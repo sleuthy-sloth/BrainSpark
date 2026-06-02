@@ -1,20 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import GameCard from "@/components/GameCard";
 import NavBar from "@/components/NavBar";
 import { GAMES_META, useStore } from "@/store";
 
-export default function HomePage() {
+function HomeContent() {
   const [mounted, setMounted] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const progress = useStore((s) => s.progress);
   const loadProgress = useStore((s) => s.loadProgress);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
     loadProgress();
   }, [loadProgress]);
+
+  // Show welcome toast after sign-in
+  useEffect(() => {
+    if (searchParams.get("welcome") === "true") {
+      setShowWelcome(true);
+      const timer = setTimeout(() => setShowWelcome(false), 4000);
+      // Clean URL without reload
+      window.history.replaceState({}, "", "/");
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   if (!mounted) {
     return (
@@ -30,6 +44,16 @@ export default function HomePage() {
     <>
       <NavBar />
       <main className="relative z-10 px-4 pb-8">
+
+        {/* Welcome toast */}
+        {showWelcome && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass-card-static px-5 py-3 animate-slide-down">
+            <p className="text-sm font-medium text-gradient text-center">
+              Welcome back! Progress synced. ✨
+            </p>
+          </div>
+        )}
+
         {/* Header */}
         <header className="pt-16 pb-6 text-center">
           <h1 className="text-4xl font-extrabold text-gradient">NeuralPulse</h1>
@@ -98,5 +122,13 @@ export default function HomePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }
