@@ -4,6 +4,10 @@
 
 NeuralPulse is an open-source brain training web app — think Elevate or Lumosity, but free, open, and playable entirely in your browser on desktop or mobile.
 
+## Live Site
+
+👉 **[neuralpulse.app](https://neuralpulse.app)**
+
 ## Games
 
 | Game | Skill | Description |
@@ -19,31 +23,72 @@ NeuralPulse is an open-source brain training web app — think Elevate or Lumosi
 
 ## Features
 
+- **8 brain games** — memory, math, reflexes, vocabulary, and focus challenges
+- **Daily Challenge** — 3-game sequence, same for everyone (like Wordle)
 - **Dark theme** — easy on the eyes, with glassmorphism cards and subtle gradients
-- **Stats tracking** — all scores saved locally, view progress per game
-- **Mobile-first** — touch-optimized, responsive layout
-- **No account needed** — everything runs client-side in your browser
+- **Stats dashboard** — skill radar charts, trend sparklines, calendar heatmap, personal bests
+- **Streak tracking** — consecutive daily completions with heatmap calendar
+- **Share scores** — Wordle-style text card for daily challenge results
+- **Guest mode** — everything works offline in IndexedDB
+- **Optional account** — sync progress across devices via Supabase (Google OAuth / magic link)
+- **Mobile-first** — touch-optimized, PWA installable, safe-area-aware
 - **Free & open source** — CC BY-NC 4.0 licensed
 
 ## Tech Stack
 
-- **Next.js 16** — static export via GitHub Pages
+- **Next.js 16** — server-rendered React, deployed on Vercel
 - **TypeScript** — full type safety
 - **Tailwind CSS** — utility-first styling
-- **IndexedDB + localStorage** — game results stored locally, works fully offline
-- **Supabase** — optional account sync (Google OAuth / email magic link)
+- **Zustand** — lightweight global state (progress, toasts)
+- **IndexedDB (idb)** — offline-first game storage
+- **Supabase** — optional account sync (Postgres + Auth)
+- **Vercel** — hosting with auto-deploy from `main`
+
+## Self-Hosting
+
+To run NeuralPulse locally or deploy your own instance:
+
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/sleuthy-sloth/NeuralPulse.git
+   cd NeuralPulse
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Supabase (optional — app works without it for guest mode):**
+   - Create a project at [supabase.com](https://supabase.com)
+   - Run the migration in `supabase/migrations/001_initial_schema.sql` via the SQL Editor
+   - Enable Google OAuth + Email Magic Link in Auth → Providers
+   - Copy your project URL and anon key
+
+4. **Configure environment:**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your Supabase credentials
+   ```
+
+5. **Run locally:**
+   ```bash
+   npm run dev
+   ```
+
+6. **Deploy to Vercel:**
+   - Push to GitHub → Vercel auto-deploys from `main`
+   - Set environment variables in Vercel dashboard:
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Configure Supabase Auth redirect URLs to point to your Vercel domain
 
 ## Development
 
 ```bash
-npm install
 npm run dev      # local dev server
-npm run build    # static export to ./out
+npm run build    # production build
 ```
-
-## Live Site
-
-👉 **[sleuthy-sloth.github.io/NeuralPulse](https://sleuthy-sloth.github.io/NeuralPulse/)**
 
 ## License
 

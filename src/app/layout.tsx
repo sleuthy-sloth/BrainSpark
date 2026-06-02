@@ -3,9 +3,33 @@ import "./globals.css";
 import RootClient from "./RootClient";
 
 export const metadata: Metadata = {
-  title: "NeuralPulse",
-  description: "Daily brain training. Sharpen your edge.",
+  title: "NeuralPulse — Daily Brain Training",
+  description:
+    "Sharpen your mind with daily brain games. Track your cognitive progress across memory, math, reflexes, and vocabulary — all in your browser.",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent" },
+  openGraph: {
+    title: "NeuralPulse — Daily Brain Training",
+    description:
+      "Sharpen your mind with daily brain games. Track your cognitive progress across memory, math, reflexes, and vocabulary.",
+    url: "https://neuralpulse.app",
+    siteName: "NeuralPulse",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "NeuralPulse — Daily Brain Training",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NeuralPulse — Daily Brain Training",
+    description:
+      "Sharpen your mind with daily brain games. Track your cognitive progress across memory, math, reflexes, and vocabulary.",
+    images: ["/og-image.svg"],
+  },
 };
 
 export const viewport: Viewport = {
