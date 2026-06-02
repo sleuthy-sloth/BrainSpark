@@ -32,9 +32,9 @@ export default function HomePage() {
       <main className="relative z-10 px-4 pb-8">
         {/* Header */}
         <header className="pt-16 pb-6 text-center">
-          <h1 className="text-4xl font-extrabold text-gradient">BrainSpark</h1>
+          <h1 className="text-4xl font-extrabold text-gradient">NeuralPulse</h1>
           <p className="text-text-secondary text-sm mt-2">
-            Train your mind with daily brain games
+            Daily brain training. Sharpen your edge.
           </p>
         </header>
 

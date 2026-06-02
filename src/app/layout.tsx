@@ -3,8 +3,8 @@ import "./globals.css";
 import RootClient from "./RootClient";
 
 export const metadata: Metadata = {
-  title: "BrainSpark",
-  description: "Train your mind with brain games",
+  title: "NeuralPulse",
+  description: "Daily brain training. Sharpen your edge.",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent" },
 };
 
@@ -13,7 +13,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0a0a1a",
+  themeColor: "#0d1117",
 };
 
 export default function RootLayout({
@@ -22,7 +22,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="apple-touch-icon" href="/BrainSpark/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/NeuralPulse/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body>
         <RootClient>{children}</RootClient>

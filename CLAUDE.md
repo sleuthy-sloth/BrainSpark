@@ -1,1 +1,3 @@
+# NeuralPulse
+
 @AGENTS.md

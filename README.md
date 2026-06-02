@@ -1,8 +1,8 @@
-# BrainSpark ✦
+# NeuralPulse ✦
 
-**Train your mind with daily brain games.**
+**Daily brain training. Sharpen your edge.**
 
-BrainSpark is an open-source brain training web app — think Elevate or Lumosity, but free, open, and playable entirely in your browser on desktop or mobile.
+NeuralPulse is an open-source brain training web app — think Elevate or Lumosity, but free, open, and playable entirely in your browser on desktop or mobile.
 
 ## Games
 
@@ -38,7 +38,7 @@ npm run build    # static export to ./out
 
 ## Live Site
 
-👉 **[sleuthy-sloth.github.io/BrainSpark](https://sleuthy-sloth.github.io/BrainSpark/)**
+👉 **[sleuthy-sloth.github.io/NeuralPulse](https://sleuthy-sloth.github.io/NeuralPulse/)**
 
 ## License
 
