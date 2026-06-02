@@ -6,6 +6,7 @@ import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import DailyCountdown from "@/components/DailyCountdown";
 import DailyStreak from "@/components/DailyStreak";
+import ShareScore from "@/components/ShareScore";
 import {
   getTodayUTC,
   generateDailySequence,
@@ -254,6 +255,13 @@ function DailyChallengeContent() {
                 completedDates={streakInfo.completedDates}
                 currentStreak={streakInfo.currentStreak}
                 longestStreak={streakInfo.longestStreak}
+              />
+
+              {/* Share Score */}
+              <ShareScore
+                dateStr={dateStr}
+                totalScore={progress?.totalScore || 0}
+                streak={streakInfo.currentStreak}
               />
 
               {/* Practice link */}

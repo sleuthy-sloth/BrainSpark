@@ -46,18 +46,31 @@ export interface ProgressState {
   workout: GameId[];
 }
 
+export type ToastType = "success" | "error" | "info" | "streak";
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
+}
+
 export interface StoreState {
   /* Global progress */
   progress: ProgressState;
   /* Current game session */
   currentGame: GameId | null;
   currentPhase: GamePhase;
+  /* Toasts */
+  toasts: Toast[];
   /* Actions */
   loadProgress: () => Promise<void>;
   refreshWorkout: () => Promise<void>;
   completeGame: (result: GameResult) => void;
   setGamePhase: (phase: GamePhase) => void;
   setCurrentGame: (id: GameId | null) => void;
+  addToast: (message: string, type?: ToastType, duration?: number) => void;
+  removeToast: (id: string) => void;
 }
 
 export const GAMES_META: GameMeta[] = [
@@ -170,6 +183,7 @@ export const useStore = create<StoreState>((set) => ({
   },
   currentGame: null,
   currentPhase: "idle",
+  toasts: [],
 
   loadProgress: async () => {
     const [streak, bq, history, proficiency, today] = await Promise.all([
@@ -209,6 +223,9 @@ export const useStore = create<StoreState>((set) => ({
         totalPlays: s.progress.totalPlays + 1,
       },
     }));
+    // Fire toast
+    const store = useStore.getState();
+    store.addToast("✅ Score saved!", "success");
     // Fire-and-forget Supabase sync
     saveGameSession({
       gameId: result.gameId,
@@ -222,4 +239,18 @@ export const useStore = create<StoreState>((set) => ({
 
   setGamePhase: (phase) => set({ currentPhase: phase }),
   setCurrentGame: (id) => set({ currentGame: id }),
+
+  addToast: (message, type = "info", duration = 3500) => {
+    const id = crypto.randomUUID();
+    set((s) => ({ toasts: [...s.toasts, { id, message, type, duration }] }));
+    if (duration > 0) {
+      setTimeout(() => {
+        set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+      }, duration);
+    }
+  },
+
+  removeToast: (id) => {
+    set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+  },
 }));

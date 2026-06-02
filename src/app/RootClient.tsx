@@ -6,6 +6,7 @@ import AuthProvider, { useAuth, useAuthModal } from "@/components/AuthProvider";
 import AuthModal from "@/components/AuthModal";
 import UserMenu from "@/components/UserMenu";
 import InstallPrompt from "@/components/InstallPrompt";
+import ToastNotification from "@/components/ToastNotification";
 
 /** Inner component that has access to auth context */
 function RootInner({ children }: { children: React.ReactNode }) {
@@ -28,6 +29,9 @@ function RootInner({ children }: { children: React.ReactNode }) {
 
       {/* Auth Modal */}
       <AuthModal open={showAuthModal} onClose={closeAuthModal} />
+
+      {/* Toast Notifications */}
+      <ToastNotification />
 
       {/* PWA Install Prompt */}
       <InstallPrompt />
