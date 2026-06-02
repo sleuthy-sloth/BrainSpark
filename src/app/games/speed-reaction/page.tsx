@@ -23,6 +23,7 @@ function SpeedReactionContent() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readyAt = useRef(0);
   const startTime = useRef(Date.now());
+  const btnRef = useRef<HTMLButtonElement>(null);
   const TOTAL = 10;
 
   const clearTimer = () => { if (timer.current) clearTimeout(timer.current); timer.current = null; };
@@ -73,6 +74,14 @@ function SpeedReactionContent() {
     }
   };
 
+  // Support Space bar on desktop
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Space") {
+      e.preventDefault();
+      handleTap();
+    }
+  };
+
   useEffect(() => () => clearTimer(), []);
 
   const circleColor = phase === "ready" ? "var(--accent-green)"
@@ -94,14 +103,19 @@ function SpeedReactionContent() {
         <h1 className="text-3xl font-extrabold text-gradient-amber mb-1">Speed Tap</h1>
         <p className="text-text-secondary text-sm mb-8">Round {Math.min(round + 1, TOTAL)}/{TOTAL}</p>
 
-        <button onClick={handleTap}
-          className="w-64 h-64 rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-150 select-none touch-action-manipulation"
+        <button
+          ref={btnRef}
+          onClick={handleTap}
+          onKeyDown={handleKeyDown}
+          className="w-[min(80vw,320px)] h-[min(80vw,320px)] min-h-[40dvh] rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-150 select-none touch-action-manipulation will-change-transform"
           style={{
             background: circleColor,
             color: phase === "waiting" ? "#0a0a1a" : "white",
             boxShadow: `0 0 60px ${circleColor}40`,
             animation: phase === "waiting" ? "pulse-glow 1.5s ease-in-out infinite" : "none",
-          }}>
+          }}
+          tabIndex={0}
+        >
           {circleText}
         </button>
 

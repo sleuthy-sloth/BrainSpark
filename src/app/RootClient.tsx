@@ -5,6 +5,7 @@ import { useStore } from "@/store";
 import AuthProvider, { useAuth, useAuthModal } from "@/components/AuthProvider";
 import AuthModal from "@/components/AuthModal";
 import UserMenu from "@/components/UserMenu";
+import InstallPrompt from "@/components/InstallPrompt";
 
 /** Inner component that has access to auth context */
 function RootInner({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,9 @@ function RootInner({ children }: { children: React.ReactNode }) {
 
       {/* Auth Modal */}
       <AuthModal open={showAuthModal} onClose={closeAuthModal} />
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
     </>
   );
 }

@@ -7,12 +7,12 @@ export default function GameCard({ game, index }: { game: GameMeta; index: numbe
   return (
     <Link
       href={game.href}
-      className="glass-card p-5 block hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+      className="glass-card p-5 block hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 min-h-[72px]"
       style={{ animationDelay: `${index * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
+          className="w-12 h-12 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-xl shrink-0"
           style={{ background: `${game.color}15`, color: game.color }}
         >
           {game.icon}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
@@ -43,7 +43,9 @@ function MemoryMatchContent() {
   const [state, setState] = useState<"playing" | "result">("playing");
   const [startTime] = useState(Date.now());
   const [elapsed, setElapsed] = useState(0);
+  const [focusIdx, setFocusIdx] = useState(0);
   const lock = useRef(false);
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     if (state !== "playing") return;
@@ -90,6 +92,41 @@ function MemoryMatchContent() {
     }
   };
 
+  // Keyboard navigation: arrow keys + Enter/Space
+  const handleCardKeyDown = (e: React.KeyboardEvent, idx: number) => {
+    const cols = 4;
+    const row = Math.floor(idx / cols);
+    const col = idx % cols;
+    let newIdx = idx;
+
+    switch (e.key) {
+      case "ArrowRight":
+        e.preventDefault();
+        newIdx = Math.min(idx + 1, cards.length - 1);
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        newIdx = Math.max(idx - 1, 0);
+        break;
+      case "ArrowDown":
+        e.preventDefault();
+        if (row < 3) newIdx = idx + cols;
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        if (row > 0) newIdx = idx - cols;
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        handleFlip(idx);
+        return;
+    }
+
+    setFocusIdx(newIdx);
+    cardRefs.current[newIdx]?.focus();
+  };
+
   return (
     <>
       <NavBar />
@@ -122,15 +159,23 @@ function MemoryMatchContent() {
               <span className="text-text-muted">{elapsed}s</span>
               <span className="text-text-secondary">Matched: <span className="font-bold text-[var(--accent-green)]">{matched}/8</span></span>
             </div>
-            <div className="grid grid-cols-4 gap-2.5 w-full max-w-sm">
+            <div className="grid grid-cols-4 gap-2.5 w-full max-w-sm" role="grid" aria-label="Memory cards">
               {cards.map((card, i) => (
-                <button key={card.id} onClick={() => handleFlip(i)}
-                  className={`aspect-square rounded-xl text-2xl flex items-center justify-center transition-all duration-300 ${
+                <button
+                  key={card.id}
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                  onClick={() => handleFlip(i)}
+                  onKeyDown={(e) => handleCardKeyDown(e, i)}
+                  disabled={card.matched}
+                  className={`memory-card aspect-square rounded-xl text-2xl flex items-center justify-center transition-all duration-300 will-change-transform min-h-[56px] min-w-[56px] ${
                     card.flipped || card.matched
                       ? "bg-[var(--bg-card)] border border-[var(--border-subtle)]"
                       : "bg-gradient-to-br from-[var(--accent-blue)]/30 to-[var(--accent-violet)]/30 border border-[var(--border-accent)] hover:brightness-110"
                   } ${card.matched ? "opacity-60" : ""}`}
-                  style={{ transform: card.flipped || card.matched ? "rotateY(0deg)" : "rotateY(180deg)" }}>
+                  style={{ transform: card.flipped || card.matched ? "rotateY(0deg)" : "rotateY(180deg)" }}
+                  aria-label={card.flipped || card.matched ? `Card ${i + 1}: ${card.emoji}` : `Card ${i + 1}: hidden`}
+                  tabIndex={0}
+                >
                   {(card.flipped || card.matched) ? card.emoji : ""}
                 </button>
               ))}

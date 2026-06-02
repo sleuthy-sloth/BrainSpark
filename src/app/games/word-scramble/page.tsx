@@ -165,7 +165,11 @@ function WordScrambleContent() {
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               placeholder="Type the word..."
               disabled={!!fb}
-              className="flex-1 px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-text-primary placeholder:text-text-muted outline-none focus:border-[var(--accent-violet)] transition-colors uppercase tracking-wider"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck="false"
+              className="flex-1 px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-text-primary placeholder:text-text-muted outline-none focus:border-[var(--accent-violet)] transition-colors uppercase tracking-wider text-base"
               autoFocus
             />
             <button onClick={handleSubmit} disabled={!!fb || !input.trim()}

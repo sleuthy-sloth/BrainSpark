@@ -46,7 +46,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
+  /* Safe area padding for notches / home indicator */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* ─── Animated Background ──────────────────────────── */
@@ -69,7 +75,8 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
 }
 
 .glass-card:hover {
@@ -94,10 +101,12 @@ body {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .btn:active {
@@ -174,8 +183,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: var(--glow-blue); }
-  50%      { box-shadow: 0 0 30px rgba(74, 158, 255, 0.35); }
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
 }
 
 @keyframes scaleIn {
@@ -203,22 +212,27 @@ body {
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease both;
+  will-change: transform, opacity;
 }
 
 .animate-slide-up {
   animation: slideUp 0.5s ease both;
+  will-change: transform, opacity;
 }
 
 .animate-scale-in {
   animation: scaleIn 0.3s ease both;
+  will-change: transform, opacity;
 }
 
 .animate-shake {
   animation: shake 0.4s ease both;
+  will-change: transform;
 }
 
 .animate-slide-down {
   animation: slideDown 0.35s ease both;
+  will-change: transform, opacity;
 }
 
 .animate-pulse-glow {
@@ -229,6 +243,7 @@ body {
 
 .stagger > * {
   animation: fadeIn 0.4s ease both;
+  will-change: transform, opacity;
 }
 .stagger > *:nth-child(1)  { animation-delay: 0.00s; }
 .stagger > *:nth-child(2)  { animation-delay: 0.04s; }
@@ -274,4 +289,30 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ─── Install Prompt ───────────────────────────────── */
+
+.install-prompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  animation: slideUp 0.35s ease both;
+  will-change: transform, opacity;
+}
+
+/* ─── Memory Match Keyboard Focus ──────────────────── */
+
+.memory-card:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* ─── Safe area for bottom-anchored elements ───────── */
+
+.safe-area-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
 }
