@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { Suspense, useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import { saveResult } from "@/lib/storage";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 type Phase = "start" | "waiting" | "ready" | "too-early" | "result-round" | "done";
 
-export default function SpeedReactionPage() {
+function SpeedReactionContent() {
   const router = useRouter();
+  const { dailyMode, seed } = useSeedParams();
+  const rng = dailyMode ? createRng(seed) : Math.random;
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [phase, setPhase] = useState<Phase>("start");
   const [round, setRound] = useState(0);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
@@ -24,7 +30,7 @@ export default function SpeedReactionPage() {
   const startWait = useCallback(() => {
     clearTimer();
     setPhase("waiting");
-    const delay = 1000 + Math.random() * 3000;
+    const delay = 1000 + rng() * 3000;
     timer.current = setTimeout(() => {
       readyAt.current = Date.now();
       setPhase("ready");
@@ -112,9 +118,27 @@ export default function SpeedReactionPage() {
           <div className="mt-4 animate-scale-in glass-card-static p-4 w-full max-w-xs text-center">
             <p className="text-sm text-text-secondary">Avg: <span className="text-[var(--accent-blue)] font-bold">{Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length)}ms</span></p>
             <p className="text-xs text-text-muted mt-1">{earlyCount} false {earlyCount === 1 ? "start" : "starts"}</p>
+            {dailyMode && dailyGameIdx !== null && (
+              <Link href={`/daily?game=${dailyGameIdx}&score=${Math.max(0, Math.round((1000 - reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) / 1000 * 10000))}`}
+                className="btn btn-md btn-ghost mt-3 block text-center text-xs">
+                ← Back to Daily Challenge
+              </Link>
+            )}
           </div>
         )}
       </main>
     </>
+  );
+}
+
+export default function SpeedReactionPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <SpeedReactionContent />
+    </Suspense>
   );
 }

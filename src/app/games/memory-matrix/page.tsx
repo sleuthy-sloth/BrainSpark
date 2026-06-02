@@ -1,18 +1,24 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import GameWrapper, { type GameConfig, type GameAPI } from "@/engine/GameWrapper";
 import { saveResult } from "@/lib/db";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 interface PatternCell {
   row: number;
   col: number;
 }
 
-function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function makeRandInt(dailyMode: boolean, seed: number) {
+  const rng = dailyMode ? createRng(seed) : Math.random;
+  return (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
+}
 
-function generatePattern(gridSize: number, count: number): PatternCell[] {
+function generatePattern(gridSize: number, count: number, randInt: (min: number, max: number) => number): PatternCell[] {
   const cells: PatternCell[] = [];
   const used = new Set<string>();
   while (cells.length < count) {
@@ -27,7 +33,10 @@ function generatePattern(gridSize: number, count: number): PatternCell[] {
   return cells;
 }
 
-export default function MemoryMatrixPage() {
+function MemoryMatrixContent() {
+  const { dailyMode, seed } = useSeedParams();
+  const randInt = makeRandInt(dailyMode, seed);
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [gridSize, setGridSize] = useState(3);
   const [pattern, setPattern] = useState<PatternCell[]>([]);
   const [patternCount, setPatternCount] = useState(2);
@@ -50,7 +59,7 @@ export default function MemoryMatrixPage() {
   };
 
   const startRound = useCallback((size: number, count: number) => {
-    const p = generatePattern(size, count);
+    const p = generatePattern(size, count, randInt);
     setPattern(p);
     setShowPattern(true);
     setTapped(new Set());
@@ -62,7 +71,7 @@ export default function MemoryMatrixPage() {
       setShowPattern(false);
       setPhase("recall");
     }, duration);
-  }, []);
+  }, [randInt]);
 
   const handleCellTap = (row: number, col: number) => {
     if (phase !== "recall") return;
@@ -260,6 +269,12 @@ export default function MemoryMatrixPage() {
               setPhase("idle");
               setLastFeedback(null);
             }} className="btn btn-md btn-primary mt-6">Play Again</button>
+            {dailyMode && dailyGameIdx !== null && (
+              <Link href={`/daily?game=${dailyGameIdx}&score=${score}`}
+                className="btn btn-md btn-ghost mt-3 block text-center">
+                ← Back to Daily Challenge
+              </Link>
+            )}
           </main>
         </>
       );
@@ -280,5 +295,17 @@ export default function MemoryMatrixPage() {
     <GameWrapper config={config} onGetResult={getResult}>
       {renderGame}
     </GameWrapper>
+  );
+}
+
+export default function MemoryMatrixPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <MemoryMatrixContent />
+    </Suspense>
   );
 }

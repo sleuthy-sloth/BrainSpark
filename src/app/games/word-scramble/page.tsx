@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { Suspense, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import { saveResult } from "@/lib/storage";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 const WORDS: Record<string, string[]> = {
   easy: ["EACH","MAKE","FILE","CODE","NOTE","PLAY","READ","SEND","TALK","WALK","WORK","GAME","TYPE","ZONE","MIND","TASK","BACK","CALL","DARK","FAST","GOLD","HIGH","IDEA","JUMP","KEEP","LAND","MOON","NAME","OPEN","PASS"],
@@ -11,17 +14,21 @@ const WORDS: Record<string, string[]> = {
   hard: ["SPARKLE","GOLDEN","BRIDGE","CANDLE","DANGER","EAGLE","FABRIC","GARDEN","HAMMER","ISLAND","JUNGLE","KITTEN","LEMONS","MARKET","NARROW","ORANGE","PIRATE","QUARTZ","RABBIT","SILVER","THUNDER"],
 };
 
-function shuffle(s: string): string {
+function shuffle(s: string, rng?: () => number): string {
   const a = s.split("");
+  const rand = rng || Math.random;
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rand() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a.join("");
 }
 
-export default function WordScramblePage() {
+function WordScrambleContent() {
   const router = useRouter();
+  const { dailyMode, seed } = useSeedParams();
+  const rng = dailyMode ? createRng(seed) : undefined;
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [diff, setDiff] = useState<"easy" | "medium" | "hard">("easy");
   const [state, setState] = useState<"menu" | "playing" | "result">("menu");
   const [word, setWord] = useState("");
@@ -38,11 +45,12 @@ export default function WordScramblePage() {
   const pickWord = useCallback((d: string) => {
     const pool = WORDS[d].filter((w) => !used.has(w));
     if (pool.length === 0) return;
-    const w = pool[Math.floor(Math.random() * pool.length)];
+    const rand = rng || Math.random;
+    const w = pool[Math.floor(rand() * pool.length)];
     setWord(w);
-    setScrambled(shuffle(w));
+    setScrambled(shuffle(w, rng));
     setUsed((u) => new Set(u).add(w));
-  }, [used]);
+  }, [used, rng]);
 
   const startGame = (d: "easy" | "medium" | "hard") => {
     setDiff(d);
@@ -117,6 +125,12 @@ export default function WordScramblePage() {
             </div>
           </div>
           <button onClick={() => setState("menu")} className="btn btn-md btn-primary mt-6">Play Again</button>
+            {dailyMode && dailyGameIdx !== null && (
+              <Link href={`/daily?game=${dailyGameIdx}&score=${score}`}
+                className="btn btn-md btn-ghost mt-3 block text-center">
+                ← Back to Daily Challenge
+              </Link>
+            )}
         </main>
       </>
     );
@@ -166,5 +180,17 @@ export default function WordScramblePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function WordScramblePage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <WordScrambleContent />
+    </Suspense>
   );
 }

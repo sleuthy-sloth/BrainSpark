@@ -1,35 +1,42 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import { saveResult } from "@/lib/storage";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 const EMOJIS = ["🚀", "🌟", "💎", "🔥", "❤️", "🦋", "🌺", "🎯"];
 
 interface Card { id: number; emoji: string; flipped: boolean; matched: boolean; }
 
-function shuffle(arr: Card[]): Card[] {
+function shuffle(arr: Card[], rng?: () => number): Card[] {
   const a = [...arr];
+  const rand = rng || Math.random;
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rand() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
 
-function initCards(): Card[] {
+function initCards(rng?: () => number): Card[] {
   const cards: Card[] = [];
   EMOJIS.forEach((emoji, i) => {
     cards.push({ id: i * 2, emoji, flipped: false, matched: false });
     cards.push({ id: i * 2 + 1, emoji, flipped: false, matched: false });
   });
-  return shuffle(cards);
+  return shuffle(cards, rng);
 }
 
-export default function MemoryMatchPage() {
+function MemoryMatchContent() {
   const router = useRouter();
-  const [cards, setCards] = useState<Card[]>(() => initCards());
+  const { dailyMode, seed } = useSeedParams();
+  const rng = dailyMode ? createRng(seed) : undefined;
+  const dailyGameIdx = useSeedParams().dailyGame;
+  const [cards, setCards] = useState<Card[]>(() => initCards(rng));
   const [flipped, setFlipped] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [matched, setMatched] = useState(0);
@@ -99,8 +106,14 @@ export default function MemoryMatchPage() {
               <div><p className="text-2xl font-bold text-[var(--accent-blue)]">{Math.max(0, 800 - moves * 10)}</p><p className="text-xs text-text-muted">Score</p></div>
             </div>
             <button onClick={() => {
-              setCards(initCards()); setFlipped([]); setMoves(0); setMatched(0); setState("playing");
+              setCards(initCards(rng)); setFlipped([]); setMoves(0); setMatched(0); setState("playing");
             }} className="btn btn-md btn-primary mt-6">Play Again</button>
+            {dailyMode && dailyGameIdx !== null && (
+              <Link href={`/daily?game=${dailyGameIdx}&score=${Math.max(0, 800 - moves * 10)}`}
+                className="btn btn-md btn-ghost mt-3 block text-center">
+                ← Back to Daily Challenge
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -126,5 +139,17 @@ export default function MemoryMatchPage() {
         )}
       </main>
     </>
+  );
+}
+
+export default function MemoryMatchPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <MemoryMatchContent />
+    </Suspense>
   );
 }

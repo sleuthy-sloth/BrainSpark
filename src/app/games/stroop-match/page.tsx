@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import GameWrapper, { type GameConfig, type GameAPI } from "@/engine/GameWrapper";
 import { saveResult } from "@/lib/db";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 const COLORS = ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE"] as const;
 const COLOR_VALUES: Record<string, string> = {
@@ -14,28 +17,33 @@ const COLOR_VALUES: Record<string, string> = {
   PURPLE: "#a78bfa",
 };
 
-function pick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+function pick<T>(arr: readonly T[], rng?: () => number): T {
+  const rand = rng || Math.random;
+  return arr[Math.floor(rand() * arr.length)];
 }
 
-function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function makeRandInt(dailyMode: boolean, seed: number) {
+  const rng = dailyMode ? createRng(seed) : Math.random;
+  return (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
+}
 
-function genStroop(level: number) {
-  const word = pick(COLORS);
+function genStroop(level: number, rng?: () => number) {
+  const word = pick(COLORS, rng);
   const availableInks = COLORS.filter((c) => c !== word || level <= 2);
-  const ink = level <= 2 ? pick(COLORS) : pick(availableInks);
+  const ink = level <= 2 ? pick(COLORS, rng) : pick(availableInks, rng);
   const correct = ink === word;
 
   // Options — the correct answer and 2-3 distractors
   const options = [COLOR_VALUES[ink]];
   const distractorPool = COLORS.filter((c) => COLOR_VALUES[c] !== COLOR_VALUES[ink]);
   while (options.length < 4) {
-    const d = COLOR_VALUES[pick(distractorPool)];
+    const d = COLOR_VALUES[pick(distractorPool, rng)];
     if (!options.includes(d)) options.push(d);
   }
-  // Shuffle
+  // Shuffle with seeded RNG
+  const srand = rng || Math.random;
   for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(srand() * (i + 1));
     [options[i], options[j]] = [options[j], options[i]];
   }
 
@@ -44,12 +52,15 @@ function genStroop(level: number) {
 
 type StroopRound = ReturnType<typeof genStroop>;
 
-export default function StroopMatchPage() {
+function StroopMatchContent() {
+  const { dailyMode, seed } = useSeedParams();
+  const rng = dailyMode ? createRng(seed) : undefined;
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [level, setLevel] = useState(1);
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
-  const [sRound, setSRound] = useState<StroopRound>(() => genStroop(1));
+  const [sRound, setSRound] = useState<StroopRound>(() => genStroop(1, rng));
   const [lastFeedback, setLastFeedback] = useState<boolean | null>(null);
   const [mode, setMode] = useState<"ink" | "word">("ink");
   const startTime = useRef(Date.now());
@@ -72,10 +83,10 @@ export default function StroopMatchPage() {
   const nextRound = useCallback(() => {
     const newLevel = 1 + Math.floor(round / 5);
     setLevel(Math.min(newLevel, 5));
-    setSRound(genStroop(Math.min(newLevel, 5)));
+    setSRound(genStroop(Math.min(newLevel, 5), rng));
     setLastFeedback(null);
     reactionStart.current = Date.now();
-  }, [round]);
+  }, [round, rng]);
 
   const handleChoice = (colorValue: string) => {
     if (lastFeedback !== null) return;
@@ -124,7 +135,7 @@ export default function StroopMatchPage() {
     startTime.current = Date.now();
     api.startGame();
     setTimeout(() => {
-      setSRound(genStroop(1));
+      setSRound(genStroop(1, rng));
       reactionStart.current = Date.now();
     }, 3000);
   };
@@ -248,6 +259,12 @@ export default function StroopMatchPage() {
               setCorrect(0);
               setLastFeedback(null);
             }} className="btn btn-md btn-primary mt-6">Play Again</button>
+            {dailyMode && dailyGameIdx !== null && (
+              <Link href={`/daily?game=${dailyGameIdx}&score=${score}`}
+                className="btn btn-md btn-ghost mt-3 block text-center">
+                ← Back to Daily Challenge
+              </Link>
+            )}
           </main>
         </>
       );
@@ -268,5 +285,17 @@ export default function StroopMatchPage() {
     <GameWrapper config={config} onGetResult={getResult}>
       {renderGame}
     </GameWrapper>
+  );
+}
+
+export default function StroopMatchPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <StroopMatchContent />
+    </Suspense>
   );
 }

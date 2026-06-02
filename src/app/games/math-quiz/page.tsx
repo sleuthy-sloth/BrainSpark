@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import { saveResult } from "@/lib/storage";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -12,9 +15,13 @@ interface Question {
   choices: number[]; answer: number;
 }
 
-function rand(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function makeRand(dailyMode: boolean, seed: number) {
+  const rng = dailyMode ? createRng(seed) : Math.random;
+  return (min: number, max: number) =>
+    Math.floor(rng() * (max - min + 1)) + min;
+}
 
-function genQuestion(d: Difficulty): Question {
+function genQuestion(d: Difficulty, rand: (min: number, max: number) => number): Question {
   const max = d === "easy" ? 10 : d === "medium" ? 25 : 50;
   let a = rand(1, max); let b = rand(1, max);
   const op = ["+", "-", "×"][rand(0, 2)] as Question["op"];
@@ -25,14 +32,17 @@ function genQuestion(d: Difficulty): Question {
     const n = answer + rand(-10, 10);
     if (!choices.includes(n) && n >= 0) choices.push(n);
   }
-  return { a, b, op, choices: choices.sort(() => Math.random() - 0.5), answer };
+  return { a, b, op, choices: [...choices].sort(() => rand(0, 1) - 0.5), answer };
 }
 
-export default function MathQuizPage() {
+function MathQuizContent() {
   const router = useRouter();
+  const { dailyMode, seed } = useSeedParams();
+  const rand = makeRand(dailyMode, seed);
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [diff, setDiff] = useState<Difficulty>("easy");
   const [state, setState] = useState<"menu" | "playing" | "result">("menu");
-  const [q, setQ] = useState<Question>(() => genQuestion("easy"));
+  const [q, setQ] = useState<Question>(() => genQuestion("easy", rand));
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
@@ -43,11 +53,11 @@ export default function MathQuizPage() {
   const TOTAL = 10;
 
   const next = useCallback((d: Difficulty) => {
-    setQ(genQuestion(d));
+    setQ(genQuestion(d, rand));
     setFb(null);
     setSelectedIdx(null);
     setRound((r) => r + 1);
-  }, []);
+  }, [rand]);
 
   const answer = (choice: number, idx: number) => {
     if (fb) return;
@@ -107,8 +117,14 @@ export default function MathQuizPage() {
             </div>
             <p className="text-xs text-text-muted">{Math.round(correct / TOTAL * 100)}% accuracy</p>
           </div>
-          <button onClick={() => { setScore(0); setCorrect(0); setRound(0); setState("menu"); setQ(genQuestion(diff)); }}
+          <button onClick={() => { setScore(0); setCorrect(0); setRound(0); setState("menu"); setQ(genQuestion(diff, rand)); }}
             className="btn btn-md btn-primary mt-6">Play Again</button>
+          {dailyMode && dailyGameIdx !== null && (
+            <Link href={`/daily?game=${dailyGameIdx}&score=${score}`}
+              className="btn btn-md btn-ghost mt-3 block text-center">
+              ← Back to Daily Challenge
+            </Link>
+          )}
         </main>
       </>
     );
@@ -151,5 +167,17 @@ export default function MathQuizPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function MathQuizPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <MathQuizContent />
+    </Suspense>
   );
 }

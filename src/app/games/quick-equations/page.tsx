@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import GameWrapper, { type GameConfig, type GameAPI } from "@/engine/GameWrapper";
+import { createRng } from "@/lib/dailyChallenge";
+import { useSeedParams } from "@/lib/useSeedParams";
 
 type Op = "+" | "-" | "×" | "÷";
 
@@ -13,9 +16,12 @@ interface Equation {
 
 const DIFFICULTY_LABELS = ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
 
-function rand(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function makeRand(dailyMode: boolean, seed: number) {
+  const rng = dailyMode ? createRng(seed) : Math.random;
+  return (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
+}
 
-function genEquation(level: number): Equation {
+function genEquation(level: number, rand: (min: number, max: number) => number): Equation {
   const ops: Op[] = level <= 1 ? ["+", "-"] : level <= 3 ? ["+", "-", "×"] : ["+", "-", "×", "÷"];
   const op = ops[rand(0, ops.length - 1)];
   const maxNum = 5 + level * 5;
@@ -36,7 +42,7 @@ function genEquation(level: number): Equation {
   }
 
   // 40% chance to show wrong answer
-  const showCorrect = Math.random() > 0.4;
+  const showCorrect = rand(0, 1000) > 400;
   const displayed = showCorrect ? answer : answer + rand(-5, 5);
 
   return {
@@ -45,9 +51,12 @@ function genEquation(level: number): Equation {
   };
 }
 
-export default function QuickEquationsPage() {
+function QuickEquationsContent() {
+  const { dailyMode, seed } = useSeedParams();
+  const rand = makeRand(dailyMode, seed);
+  const dailyGameIdx = useSeedParams().dailyGame;
   const [level, setLevel] = useState(1);
-  const [currentQ, setCurrentQ] = useState<Equation>(() => genEquation(1));
+  const [currentQ, setCurrentQ] = useState<Equation>(() => genEquation(1, rand));
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const startTime = useRef(Date.now());
@@ -71,11 +80,11 @@ export default function QuickEquationsPage() {
       return next;
     });
     setTimeout(() => {
-      setCurrentQ(genEquation(level));
+      setCurrentQ(genEquation(level, rand));
       setLastCorrect(null);
       reactionStart.current = Date.now();
     }, 400);
-  }, [level]);
+  }, [level, rand]);
 
   const getResult = useCallback(() => {
     return {
@@ -238,6 +247,12 @@ export default function QuickEquationsPage() {
                 setLastCorrect(null);
                 api.resetGame();
               }} className="btn btn-md btn-primary">Play Again</button>
+              {dailyMode && dailyGameIdx !== null && (
+                <Link href={`/daily?game=${dailyGameIdx}&score=${api.score.score}`}
+                  className="btn btn-md btn-ghost mt-3 block text-center">
+                  ← Back to Daily Challenge
+                </Link>
+              )}
             </div>
           </main>
         </>
@@ -263,5 +278,17 @@ export default function QuickEquationsPage() {
     <GameWrapper config={config} onGetResult={handleGetResult}>
       {renderGame}
     </GameWrapper>
+  );
+}
+
+export default function QuickEquationsPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <QuickEquationsContent />
+    </Suspense>
   );
 }
