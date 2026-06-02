@@ -3,7 +3,7 @@
  * Same date → same seed → same game sequence for every user.
  */
 
-export type DailyGameId = "math_sprint" | "memory_match" | "speed_tap" | "word_twist";
+export type DailyGameId = "math_sprint" | "memory_match" | "speed_tap" | "word_twist" | "sequence_memory";
 
 export interface DailyGame {
   game: DailyGameId;
@@ -11,7 +11,7 @@ export interface DailyGame {
   seed: number;
 }
 
-const GAME_POOL: DailyGameId[] = ["math_sprint", "memory_match", "speed_tap", "word_twist"];
+const GAME_POOL: DailyGameId[] = ["math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory"];
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
 /**
@@ -31,20 +31,20 @@ export function getDailySeed(dateStr: string): number {
 export function generateDailySequence(dateStr: string): DailyGame[] {
   const seed = getDailySeed(dateStr);
 
-  // Pick 3 of the 4 games deterministically, with difficulty
+  // Pick 3 of the 5 games deterministically, with difficulty
   const games: DailyGame[] = [
     {
-      game: GAME_POOL[seed % 4],
+      game: GAME_POOL[seed % 5],
       difficulty: DIFFICULTIES[seed % 3],
       seed: seed,
     },
     {
-      game: GAME_POOL[(seed + 1) % 4],
+      game: GAME_POOL[(seed + 1) % 5],
       difficulty: DIFFICULTIES[(seed + 2) % 3],
       seed: seed + 1,
     },
     {
-      game: GAME_POOL[(seed + 2) % 4],
+      game: GAME_POOL[(seed + 2) % 5],
       difficulty: DIFFICULTIES[(seed + 1) % 3],
       seed: seed + 2,
     },
@@ -102,6 +102,7 @@ export function dailyGameRoute(game: DailyGameId): string {
     memory_match: "/games/memory-match",
     speed_tap: "/games/speed-reaction",
     word_twist: "/games/word-scramble",
+    sequence_memory: "/games/sequence-memory",
   };
   return map[game];
 }
@@ -115,6 +116,7 @@ export function dailyGameToAppId(game: DailyGameId): string {
     memory_match: "memory-match",
     speed_tap: "speed-reaction",
     word_twist: "word-scramble",
+    sequence_memory: "sequence-memory",
   };
   return map[game];
 }
@@ -127,6 +129,7 @@ export const DAILY_GAME_NAMES: Record<DailyGameId, string> = {
   memory_match: "Memory Match",
   speed_tap: "Speed Tap",
   word_twist: "Word Twist",
+  sequence_memory: "Sequence Memory",
 };
 
 export const DAILY_GAME_ICONS: Record<DailyGameId, string> = {
@@ -134,6 +137,7 @@ export const DAILY_GAME_ICONS: Record<DailyGameId, string> = {
   memory_match: "◆",
   speed_tap: "⚡",
   word_twist: "✦",
+  sequence_memory: "◈",
 };
 
 export const DAILY_GAME_COLORS: Record<DailyGameId, string> = {
@@ -141,6 +145,7 @@ export const DAILY_GAME_COLORS: Record<DailyGameId, string> = {
   memory_match: "var(--accent-green)",
   speed_tap: "var(--accent-amber)",
   word_twist: "var(--accent-violet)",
+  sequence_memory: "var(--accent-green)",
 };
 
 export const DAILY_GAME_CATEGORIES: Record<DailyGameId, string> = {
@@ -148,6 +153,7 @@ export const DAILY_GAME_CATEGORIES: Record<DailyGameId, string> = {
   memory_match: "Memory",
   speed_tap: "Reflexes",
   word_twist: "Vocabulary",
+  sequence_memory: "Memory",
 };
 
 /**

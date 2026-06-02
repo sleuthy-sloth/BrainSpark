@@ -138,6 +138,17 @@ export const GAMES_META: GameMeta[] = [
     icon: "✦",
     gradient: "text-gradient-violet",
   },
+  {
+    id: "sequence-memory",
+    title: "Sequence Memory",
+    subtitle: "Repeat the pattern",
+    description: "Watch tiles light up, then tap them back in the same order.",
+    href: "/games/sequence-memory",
+    category: "memory",
+    color: "#34d399",
+    icon: "◈",
+    gradient: "text-gradient-green",
+  },
 ];
 
 export function getGameMeta(id: GameId): GameMeta {

@@ -64,7 +64,7 @@ export interface CalendarMonth {
 
 export const SKILL_DEFS: { skill: string; games: GameId[]; color: string }[] = [
   { skill: "Numeracy", games: ["math-quiz", "quick-equations"], color: "#4a9eff" },
-  { skill: "Memory", games: ["memory-match", "memory-matrix"], color: "#34d399" },
+  { skill: "Memory", games: ["memory-match", "memory-matrix", "sequence-memory"], color: "#34d399" },
   { skill: "Reflexes", games: ["speed-reaction"], color: "#fbbf24" },
   { skill: "Vocabulary", games: ["word-scramble"], color: "#a78bfa" },
   { skill: "Focus", games: ["stroop-match"], color: "#fb7185" },

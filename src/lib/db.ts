@@ -2,7 +2,7 @@ import { openDB, type IDBPDatabase } from "idb";
 import { supabase, getUser } from "./supabase";
 
 
-export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match";
+export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory";
 
 export type Category = "math" | "memory" | "focus";
 
@@ -11,6 +11,7 @@ export const GAME_CATEGORIES: Record<GameId, Category> = {
   "quick-equations": "math",
   "memory-match": "memory",
   "memory-matrix": "memory",
+  "sequence-memory": "memory",
   "speed-reaction": "focus",
   "stroop-match": "focus",
   "word-scramble": "focus",
@@ -271,7 +272,7 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
   // Pick one game from each category (top 3)
   const gamesByCat: Record<Category, GameId[]> = {
     math: ["quick-equations", "math-quiz"],
-    memory: ["memory-matrix", "memory-match"],
+    memory: ["memory-matrix", "memory-match", "sequence-memory"],
     focus: ["stroop-match", "speed-reaction", "word-scramble"],
   };
 
@@ -319,6 +320,7 @@ function mapGameType(id: GameId): string {
     "quick-equations": "quick_equations",
     "memory-match": "memory_match",
     "memory-matrix": "memory_matrix",
+    "sequence-memory": "sequence_memory",
     "speed-reaction": "speed_tap",
     "stroop-match": "stroop_match",
     "word-scramble": "word_twist",

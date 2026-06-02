@@ -8,8 +8,12 @@ NeuralPulse is an open-source brain training web app — think Elevate or Lumosi
 
 | Game | Skill | Description |
 |------|-------|-------------|
+| **Quick Equations** | Numeracy | True or false? Rapidly verify math equations under time pressure. |
 | **Math Sprint** | Numeracy | Solve arithmetic problems against the clock. 3 difficulty levels. |
 | **Memory Match** | Memory | Flip cards and find matching pairs. Train your visual short-term memory. |
+| **Memory Matrix** | Memory | Memorize highlighted tiles and reproduce the pattern on an expanding grid. |
+| **Sequence Memory** | Memory | Watch tiles light up in a sequence, then tap them back in order. Simon-style. |
+| **Stroop Match** | Focus | Identify the ink color, not the word itself. |
 | **Speed Tap** | Reflexes | React as fast as you can when the signal changes. Measure your response time. |
 | **Word Twist** | Vocabulary | Unscramble letters to form words. Expand your mental agility. |
 
@@ -26,7 +30,8 @@ NeuralPulse is an open-source brain training web app — think Elevate or Lumosi
 - **Next.js 16** — static export via GitHub Pages
 - **TypeScript** — full type safety
 - **Tailwind CSS** — utility-first styling
-- **localStorage** — game results stored locally
+- **IndexedDB + localStorage** — game results stored locally, works fully offline
+- **Supabase** — optional account sync (Google OAuth / email magic link)
 
 ## Development
 
