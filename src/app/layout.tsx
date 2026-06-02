@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "BrainSpark",
-  description: "Open-source brain training",
+  description: "Train your mind with brain games",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
@@ -11,16 +12,23 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#0a0a1a",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <link rel="apple-touch-icon" href="/BrainSpark/apple-touch-icon.png" />
+      </head>
+      <body>
+        <div className="bg-gradient-canvas" />
+        <div className="relative z-10 min-h-dvh">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
