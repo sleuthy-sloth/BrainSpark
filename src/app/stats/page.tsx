@@ -3,35 +3,38 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
-import { getAllGamesStats, getTotalPlays } from "@/lib/storage";
-import type { GameStats, GameId } from "@/lib/storage";
-import { GAMES } from "@/lib/games";
+import { GAMES_META } from "@/store";
+import { getAllProficiency, getDailyHistory, calculateStreak, calculateBrainQuotient } from "@/lib/db";
+import type { Proficiency, DailyEntry } from "@/lib/db";
 
-function StatCard({ game, stats }: { game: typeof GAMES[0]; stats: GameStats }) {
+function StatCard({ gameId, prof }: { gameId: string; prof: Proficiency }) {
+  const meta = GAMES_META.find((g) => g.id === gameId);
+  if (!meta) return null;
+
   return (
     <div className="glass-card-static p-4">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-          style={{ background: `${game.color}15`, color: game.color }}>
-          {game.icon}
+          style={{ background: `${meta.color}15`, color: meta.color }}>
+          {meta.icon}
         </div>
         <div>
-          <h3 className={`font-bold text-sm ${game.gradient}`}>{game.title}</h3>
-          <p className="text-xs text-text-muted">{stats.totalPlays} {stats.totalPlays === 1 ? "play" : "plays"}</p>
+          <h3 className={`font-bold text-sm ${meta.gradient}`}>{meta.title}</h3>
+          <p className="text-xs text-text-muted">{prof.totalPlays} {prof.totalPlays === 1 ? "play" : "plays"}</p>
         </div>
       </div>
-      {stats.totalPlays > 0 ? (
+      {prof.totalPlays > 0 ? (
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
-            <p className="text-lg font-bold text-[var(--accent-blue)]">{stats.bestScore}</p>
+            <p className="text-lg font-bold text-[var(--accent-blue)]">{prof.bestScore}</p>
             <p className="text-[10px] text-text-muted">Best</p>
           </div>
           <div>
-            <p className="text-lg font-bold text-[var(--accent-amber)]">{stats.averageScore}</p>
+            <p className="text-lg font-bold text-[var(--accent-amber)]">{prof.totalPlays > 0 ? Math.round(prof.cumulativeScore / prof.totalPlays) : 0}</p>
             <p className="text-[10px] text-text-muted">Avg</p>
           </div>
           <div>
-            <p className="text-lg font-bold text-[var(--accent-green)]">{stats.bestAccuracy}%</p>
+            <p className="text-lg font-bold text-[var(--accent-green)]">{prof.bestAccuracy}%</p>
             <p className="text-[10px] text-text-muted">Best</p>
           </div>
         </div>
@@ -43,14 +46,25 @@ function StatCard({ game, stats }: { game: typeof GAMES[0]; stats: GameStats }) 
 }
 
 export default function StatsPage() {
-  const [stats, setStats] = useState<Record<string, GameStats>>({});
-  const [totalPlays, setTotalPlays] = useState(0);
+  const [prof, setProf] = useState<Proficiency[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [bq, setBq] = useState(0);
+  const [history, setHistory] = useState<DailyEntry[]>([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setStats(getAllGamesStats());
-    setTotalPlays(getTotalPlays());
+    Promise.all([
+      getAllProficiency(),
+      calculateStreak(),
+      calculateBrainQuotient(),
+      getDailyHistory(30),
+    ]).then(([p, s, b, h]) => {
+      setProf(p);
+      setStreak(s);
+      setBq(b);
+      setHistory(h);
+    });
   }, []);
 
   if (!mounted) {
@@ -61,6 +75,8 @@ export default function StatsPage() {
     );
   }
 
+  const totalPlays = prof.reduce((s, p) => s + p.totalPlays, 0);
+
   return (
     <>
       <NavBar />
@@ -69,9 +85,27 @@ export default function StatsPage() {
           <div className="text-center mb-6">
             <h1 className="text-3xl font-extrabold text-gradient">Progress</h1>
             <p className="text-text-secondary text-sm mt-1">
-              {totalPlays} {totalPlays === 1 ? "game" : "games"} played total
+              {totalPlays} {totalPlays === 1 ? "game" : "games"} played
             </p>
           </div>
+
+          {/* Overview */}
+          {totalPlays > 0 && (
+            <div className="glass-card-static p-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="text-3xl font-extrabold text-gradient">{bq}</p>
+                  <p className="text-xs text-text-muted">Brain Quotient</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-extrabold text-gradient-amber">
+                    {streak}<span className="text-sm">🔥</span>
+                  </p>
+                  <p className="text-xs text-text-muted">Day Streak</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {totalPlays === 0 ? (
             <div className="glass-card-static p-8 text-center">
@@ -82,20 +116,37 @@ export default function StatsPage() {
             </div>
           ) : (
             <div className="space-y-3 stagger">
-              {GAMES.map((game) => (
-                <StatCard key={game.id} game={game} stats={stats[game.id] || {
-                  totalPlays: 0, bestScore: 0, bestAccuracy: 0, averageScore: 0, averageAccuracy: 0, recentResults: [], streak: 0, lastPlayedDate: "",
-                }} />
-              ))}
+              {GAMES_META.map((game) => {
+                const p = prof.find((p) => p.gameId === game.id) || {
+                  gameId: game.id,
+                  category: game.category,
+                  totalPlays: 0,
+                  bestScore: 0,
+                  bestAccuracy: 0,
+                  cumulativeScore: 0,
+                  lastPlayed: 0,
+                };
+                return <StatCard key={game.id} gameId={game.id} prof={p} />;
+              })}
             </div>
           )}
 
-          {totalPlays > 0 && (
-            <div className="mt-6 glass-card-static p-4 text-center">
-              <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Overall Best Score</p>
-              <p className="text-3xl font-extrabold text-gradient">
-                {Math.max(...Object.values(stats).map((s) => s.bestScore))}
-              </p>
+          {/* Recent Activity */}
+          {history.length > 0 && (
+            <div className="mt-6 glass-card-static p-4">
+              <h2 className="text-sm font-bold text-text-primary mb-3">Recent Activity</h2>
+              <div className="space-y-1.5">
+                {history.slice(0, 7).map((day) => (
+                  <div key={day.date} className="flex items-center justify-between text-xs">
+                    <span className="text-text-muted">
+                      {new Date(day.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    </span>
+                    <span className={day.completed ? "text-[var(--accent-green)]" : "text-text-muted"}>
+                      {day.completed ? `✓ ${day.gamesPlayed.length} games` : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

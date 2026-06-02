@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import RootClient from "./RootClient";
 
 export const metadata: Metadata = {
   title: "BrainSpark",
@@ -24,10 +25,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/BrainSpark/apple-touch-icon.png" />
       </head>
       <body>
-        <div className="bg-gradient-canvas" />
-        <div className="relative z-10 min-h-dvh">
-          {children}
-        </div>
+        <RootClient>{children}</RootClient>
       </body>
     </html>
   );

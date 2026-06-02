@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { GameMeta } from "@/lib/games";
+import type { GameMeta } from "@/store";
 
 export default function GameCard({ game, index }: { game: GameMeta; index: number }) {
   return (
