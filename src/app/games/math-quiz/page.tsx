@@ -16,10 +16,10 @@ function rand(min: number, max: number) { return Math.floor(Math.random() * (max
 
 function genQuestion(d: Difficulty): Question {
   const max = d === "easy" ? 10 : d === "medium" ? 25 : 50;
-  const a = rand(1, max); const b = rand(1, max);
+  let a = rand(1, max); let b = rand(1, max);
   const op = ["+", "-", "×"][rand(0, 2)] as Question["op"];
   let answer = op === "+" ? a + b : op === "-" ? a - b : a * b;
-  if (op === "-" && answer < 0) { [a, b]; answer = a - b; }
+  if (op === "-" && answer < 0) { [a, b] = [b, a]; answer = a - b; }
   const choices = [answer];
   while (choices.length < 4) {
     const n = answer + rand(-10, 10);
