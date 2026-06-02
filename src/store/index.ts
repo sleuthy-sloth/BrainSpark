@@ -9,6 +9,7 @@ import {
   calculateStreak,
   calculateBrainQuotient,
   generateDailyWorkout,
+  saveGameSession,
 } from "@/lib/db";
 
 /* ─── Types ─────────────────────────────────────────── */
@@ -197,6 +198,15 @@ export const useStore = create<StoreState>((set) => ({
         totalPlays: s.progress.totalPlays + 1,
       },
     }));
+    // Fire-and-forget Supabase sync
+    saveGameSession({
+      gameId: result.gameId,
+      score: result.score,
+      maxScore: result.maxScore,
+      accuracy: result.accuracy,
+      difficulty: result.difficulty,
+      duration: result.duration,
+    });
   },
 
   setGamePhase: (phase) => set({ currentPhase: phase }),

@@ -1,4 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
+import { supabase, getUser } from "./supabase";
+
 
 export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match";
 
@@ -45,7 +47,7 @@ export interface Proficiency {
 }
 
 const DB_NAME = "brainspark";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 async function getDB(): Promise<IDBPDatabase> {
   return openDB(DB_NAME, DB_VERSION, {
@@ -65,6 +67,10 @@ async function getDB(): Promise<IDBPDatabase> {
       }
       if (!db.objectStoreNames.contains("settings")) {
         db.createObjectStore("settings", { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains("pending_sessions")) {
+        db.createObjectStore("pending_sessions", { keyPath: "id" });
+        db.createObjectStore("daily_cache", { keyPath: "challenge_date" });
       }
     },
   });
@@ -289,4 +295,193 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
   }
 
   return workout;
+}
+
+/* ─── Supabase Service Layer ──────────────────────── */
+
+export interface PendingSession {
+  id: string;
+  gameId: GameId;
+  score: number;
+  maxScore: number;
+  accuracy: number;
+  difficulty: string;
+  duration: number;
+  timestamp: number;
+}
+
+/**
+ * Maps app GameId to the game_type stored in Supabase.
+ */
+function mapGameType(id: GameId): string {
+  const map: Record<GameId, string> = {
+    "math-quiz": "math_sprint",
+    "quick-equations": "quick_equations",
+    "memory-match": "memory_match",
+    "memory-matrix": "memory_matrix",
+    "speed-reaction": "speed_tap",
+    "stroop-match": "stroop_match",
+    "word-scramble": "word_twist",
+  };
+  return map[id] ?? id;
+}
+
+/**
+ * Save a game session to Supabase if logged in.
+ * Falls back to an IndexedDB offline queue if anonymous or offline.
+ */
+export async function saveGameSession(
+  session: Omit<PendingSession, "id" | "timestamp">
+): Promise<void> {
+  const user = await getUser();
+
+  if (user) {
+    // Online path — save to Supabase
+    const { error } = await supabase.from("game_sessions").insert({
+      user_id: user.id,
+      game_type: mapGameType(session.gameId),
+      score: session.score,
+      duration_seconds: session.duration,
+      difficulty: session.difficulty,
+    });
+    if (error) {
+      console.warn("Supabase save failed, queuing offline:", error.message);
+      await queuePendingSession(session);
+    }
+  } else {
+    // Offline / anonymous path
+    await queuePendingSession(session);
+  }
+}
+
+async function queuePendingSession(
+  session: Omit<PendingSession, "id" | "timestamp">
+): Promise<void> {
+  const db = await getDB();
+  const entry: PendingSession = {
+    ...session,
+    id: crypto.randomUUID(),
+    timestamp: Date.now(),
+  };
+  await db.add("pending_sessions", entry);
+}
+
+/**
+ * Returns aggregated stats per game type for the logged-in user.
+ * Falls back to local IndexedDB proficiency if no user.
+ */
+export async function getUserStats(userId?: string): Promise<
+  { game_type: string; total_plays: number; avg_score: number; best_score: number }[]
+> {
+  if (userId) {
+    const { data, error } = await supabase.rpc("get_user_stats", {
+      p_user_id: userId,
+    });
+    if (!error && data) return data as any;
+  }
+
+  // Fallback to local
+  const profs = await getAllProficiency();
+  return profs.map((p) => ({
+    game_type: mapGameType(p.gameId),
+    total_plays: p.totalPlays,
+    avg_score: p.totalPlays > 0 ? Math.round(p.cumulativeScore / p.totalPlays) : 0,
+    best_score: p.bestScore,
+  }));
+}
+
+interface DailyChallengeEntry {
+  challenge_date: string;
+  game_sequence: Array<{
+    game_type: string;
+    seed: number;
+    difficulty: string;
+  }>;
+}
+
+/**
+ * Fetch today's daily challenge from Supabase, or generate a deterministic
+ * one client-side using the date as seed. Caches locally for offline use.
+ */
+export async function getOrCreateDailyChallenge(
+  date: string
+): Promise<DailyChallengeEntry> {
+  const db = await getDB();
+
+  // Check local cache first
+  const cached = await db.get("daily_cache", date);
+  if (cached) return cached as DailyChallengeEntry;
+
+  // Try Supabase
+  try {
+    const { data, error } = await supabase
+      .from("daily_challenges")
+      .select("*")
+      .eq("challenge_date", date)
+      .single();
+    if (!error && data) {
+      await db.put("daily_cache", data);
+      return data as DailyChallengeEntry;
+    }
+  } catch {
+    // Fall through to client generation
+  }
+
+  // Generate client-side using date as seed
+  const numericSeed = date.split("-").reduce((s, p) => s * 31 + parseInt(p), 0);
+  const seededRandom = (n: number) => {
+    const x = Math.sin(n * numericSeed + 1) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const games: GameId[] = ["quick-equations", "memory-matrix", "stroop-match"];
+  const difficulties = ["easy", "medium", "hard"];
+  const sequence = games.map((gid, i) => ({
+    game_type: mapGameType(gid),
+    seed: Math.floor(seededRandom(i * 3) * 999999),
+    difficulty: difficulties[Math.floor(seededRandom(i * 3 + 1) * 3)],
+  }));
+
+  const entry: DailyChallengeEntry = {
+    challenge_date: date,
+    game_sequence: sequence,
+  };
+
+  await db.put("daily_cache", entry);
+  return entry;
+}
+
+/**
+ * Upload all queued pending sessions to Supabase, then clear the queue.
+ */
+export async function syncOfflineQueue(): Promise<number> {
+  const user = await getUser();
+  if (!user) return 0;
+
+  const db = await getDB();
+  const pending = await db.getAll("pending_sessions");
+  if (pending.length === 0) return 0;
+
+  const rows = pending.map((s: PendingSession) => ({
+    user_id: user.id,
+    game_type: mapGameType(s.gameId),
+    score: s.score,
+    duration_seconds: s.duration,
+    difficulty: s.difficulty,
+  }));
+
+  const { error } = await supabase.from("game_sessions").insert(rows);
+  if (error) {
+    console.error("Failed to sync offline queue:", error.message);
+    return 0;
+  }
+
+  // Clear queue
+  const tx = db.transaction("pending_sessions", "readwrite");
+  for (const s of pending) {
+    tx.store.delete(s.id);
+  }
+  await tx.done;
+
+  return pending.length;
 }
