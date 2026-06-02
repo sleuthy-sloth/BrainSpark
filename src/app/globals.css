@@ -1,26 +1,223 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --accent: #22d3ee;
+  --success: #22c55e;
+  --error: #ef4444;
+  --card-bg: #1e293b;
+  --card-border: #334155;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 1rem;
+  gap: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.score-row span:last-child {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.question {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding: 1rem 0;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.answer-btn {
+  background: #334155;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 1.25rem 0.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.answer-btn:active {
+  transform: scale(0.95);
+}
+
+.answer-btn.correct {
+  background: var(--success);
+  animation: pop 0.3s ease;
+}
+
+.answer-btn.wrong {
+  background: var(--error);
+  animation: shake 0.3s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.start-btn {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  border-radius: 3rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  touch-action: manipulation;
+}
+
+.start-btn:active {
+  transform: scale(0.97);
+}
+
+.streak {
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.streak-fire {
+  font-size: 1.25rem;
+}
+
+.feedback {
+  min-height: 2rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.feedback.correct { color: var(--success); }
+.feedback.wrong { color: var(--error); }
+
+.timer-bar {
+  width: 100%;
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.mode-select {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.mode-btn {
+  flex: 1;
+  background: #334155;
+  border: 2px solid transparent;
+  color: #94a3b8;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.mode-btn.active {
+  border-color: var(--primary);
+  color: var(--foreground);
+  background: #1e293b;
+}
+
+.result-text {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.result-sub {
+  color: #94a3b8;
+  font-size: 1rem;
+  text-align: center;
 }
