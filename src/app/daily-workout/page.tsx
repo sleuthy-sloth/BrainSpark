@@ -92,7 +92,7 @@ export default function DailyWorkoutPage() {
   return (
     <>
       <NavBar />
-      <main className="relative z-10 px-4 pt-20 pb-8">
+      <main className="relative z-10 px-4 pt-4 pb-4 has-bottom-nav">
         <div className="max-w-lg mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-extrabold text-gradient">Daily Workout</h1>

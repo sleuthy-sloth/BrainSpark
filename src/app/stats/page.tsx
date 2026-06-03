@@ -96,10 +96,10 @@ function StatsContent() {
   return (
     <>
       <NavBar />
-      <main className="relative z-10 px-4 pb-12">
+      <main className="relative z-10 px-4 pb-4 has-bottom-nav">
         {/* Header */}
-        <header className="pt-16 pb-5 text-center">
-          <h1 className="text-3xl font-extrabold text-gradient">Statistics</h1>
+        <header className="pt-4 pb-5 text-center">
+          <h1 className="text-[22px] font-bold text-white">Statistics</h1>
           <p className="text-text-secondary text-sm mt-1">
             {totalGames > 0
               ? `${totalGames} game${totalGames !== 1 ? "s" : ""} across ${

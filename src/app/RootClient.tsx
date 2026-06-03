@@ -7,6 +7,7 @@ import AuthModal from "@/components/AuthModal";
 import UserMenu from "@/components/UserMenu";
 import InstallPrompt from "@/components/InstallPrompt";
 import ToastNotification from "@/components/ToastNotification";
+import BottomNav from "@/components/BottomNav";
 
 /** Inner component that has access to auth context */
 function RootInner({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,9 @@ function RootInner({ children }: { children: React.ReactNode }) {
       <div className="fixed top-3 right-4 z-50">
         <UserMenu onSignInClick={openAuthModal} />
       </div>
+
+      {/* Bottom Navigation (Elevate-style) */}
+      <BottomNav />
 
       {/* Auth Modal */}
       <AuthModal open={showAuthModal} onClose={closeAuthModal} />

@@ -130,7 +130,7 @@ function MemoryMatchContent() {
   return (
     <>
       <NavBar />
-      <main className="relative z-10 min-h-dvh flex flex-col items-center px-4 pt-20 pb-8">
+      <main className="relative z-10 min-h-dvh flex flex-col items-center px-4 pt-4 pb-4 has-bottom-nav">
         {state === "result" ? (
           <div className="flex flex-col items-center justify-center flex-1 animate-scale-in">
             <div className="text-5xl mb-3">🎉</div>

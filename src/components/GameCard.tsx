@@ -7,25 +7,27 @@ export default function GameCard({ game, index }: { game: GameMeta; index: numbe
   return (
     <Link
       href={game.href}
-      className="glass-card p-5 block hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 min-h-[72px]"
-      style={{ animationDelay: `${index * 0.05}s` }}
+      className="elevate-card elevate-card-accent block min-h-[72px]"
+      style={{ animationDelay: `${index * 0.06}s` }}
     >
-      <div className="flex items-start gap-4">
+      {/* Accent strip */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-[16px]"
+        style={{ backgroundColor: game.color }}
+      />
+      <div className="flex items-center gap-4 p-4 pl-5">
         <div
-          className="w-12 h-12 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-xl shrink-0"
-          style={{ background: `${game.color}15`, color: game.color }}
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-base shrink-0 font-mono-digits"
+          style={{ backgroundColor: `${game.color}1a`, color: game.color }}
         >
           {game.icon}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className={`text-lg font-bold ${game.gradient}`}>{game.title}</h3>
-          <p className="text-sm text-text-secondary mt-0.5">{game.subtitle}</p>
-          <p className="text-xs text-text-muted mt-1.5 leading-relaxed line-clamp-2">
-            {game.description}
-          </p>
+          <h3 className="text-[15px] font-semibold text-white">{game.title}</h3>
+          <p className="text-[13px] text-[var(--text-secondary)] mt-0.5">{game.description}</p>
         </div>
         <svg
-          className="w-5 h-5 text-text-muted shrink-0 mt-2"
+          className="w-4 h-4 text-[var(--text-muted)] shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
