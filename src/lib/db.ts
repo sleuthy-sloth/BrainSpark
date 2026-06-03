@@ -2,7 +2,7 @@ import { openDB, type IDBPDatabase } from "idb";
 import { supabase, getUser } from "./supabase";
 
 
-export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory";
+export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory" | "star-battle";
 
 export type Category = "numeracy" | "memory" | "focus" | "reflexes" | "vocabulary" | "logic";
 
@@ -14,6 +14,7 @@ export const GAME_CATEGORIES: Record<GameId, Category> = {
   "sequence-memory": "memory",
   "speed-reaction": "reflexes",
   "stroop-match": "focus",
+  "star-battle": "logic",
   "word-scramble": "vocabulary",
 };
 
@@ -275,7 +276,7 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
     focus: ["stroop-match"],
     reflexes: ["speed-reaction"],
     vocabulary: ["word-scramble"],
-    logic: [],
+    logic: ["star-battle"],
   };
 
   const workout: GameId[] = [];
@@ -322,6 +323,7 @@ function mapGameType(id: GameId): string {
     "memory-match": "memory_match",
     "memory-matrix": "memory_matrix",
     "sequence-memory": "sequence_memory",
+    "star-battle": "star_battle",
     "speed-reaction": "speed_tap",
     "stroop-match": "stroop_match",
     "word-scramble": "word_twist",

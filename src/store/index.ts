@@ -162,6 +162,17 @@ export const GAMES_META: GameMeta[] = [
     icon: "◈",
     gradient: "text-gradient-green",
   },
+  {
+    id: "star-battle",
+    title: "Star Battle",
+    subtitle: "Logic puzzle",
+    description: "Place one star in each row, column, and region. No two stars may touch.",
+    href: "/games/star-battle",
+    category: "logic",
+    color: "#22d3ee",
+    icon: "⊞",
+    gradient: "text-gradient-cyan",
+  },
 ];
 
 export function getGameMeta(id: GameId): GameMeta {

@@ -68,6 +68,7 @@ export const SKILL_DEFS: { skill: string; games: GameId[]; color: string }[] = [
   { skill: "Reflexes", games: ["speed-reaction"], color: "#fbbf24" },
   { skill: "Vocabulary", games: ["word-scramble"], color: "#a78bfa" },
   { skill: "Focus", games: ["stroop-match"], color: "#fb7185" },
+  { skill: "Logic", games: ["star-battle"], color: "#22d3ee" },
 ];
 
 /* ─── Aggregation ───────────────────────────────────── */

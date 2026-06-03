@@ -380,6 +380,13 @@ body {
   background-clip: text;
 }
 
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #22d3ee, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* ─── Backward compat aliases ──────────────────────── */
 
 .glass-card {
