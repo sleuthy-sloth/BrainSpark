@@ -3,26 +3,26 @@
 /* ─── Design System (Elevate-Inspired) ──────────────── */
 
 :root {
-  --bg-primary: #1a1c2e;
-  --bg-secondary: #232639;
-  --bg-card: #232639;
-  --bg-card-hover: #2a2d42;
-  --bg-surface: #2d3148;
+  --bg-primary: #363958;
+  --bg-secondary: #44476a;
+  --bg-card: #4d5078;
+  --bg-card-hover: #585b84;
+  --bg-surface: #555888;
 
   --text-primary: #ffffff;
-  --text-secondary: #8e92a8;
-  --text-muted: #5c6078;
+  --text-secondary: #bcc0d8;
+  --text-muted: #8c90b0;
 
-  --accent-blue: #3b82f6;
-  --accent-green: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-violet: #8b5cf6;
-  --accent-rose: #ec4899;
-  --accent-cyan: #00d4aa;
-  --accent-teal: #00d4aa;
-  --accent-orange: #f59e0b;
+  --accent-blue: #5b9cff;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-violet: #a78bfa;
+  --accent-rose: #fb7185;
+  --accent-cyan: #22d3ee;
+  --accent-teal: #22d3ee;
+  --accent-orange: #fb923c;
 
-  --track-bg: #2d3148;
+  --track-bg: #555888;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -134,7 +134,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: #6096fd;
+  background: #7bb3ff;
 }
 
 .btn-success {
@@ -143,7 +143,7 @@ body {
 }
 
 .btn-success:hover {
-  background: #34d399;
+  background: #4ade80;
 }
 
 .btn-amber {
@@ -152,7 +152,7 @@ body {
 }
 
 .btn-amber:hover {
-  background: #fbbf24;
+  background: #fcd34d;
 }
 
 .btn-ghost {
@@ -197,7 +197,7 @@ body {
   background: var(--bg-secondary);
   padding: 6px 0;
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bottom-nav-item {
