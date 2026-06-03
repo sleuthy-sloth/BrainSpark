@@ -7,125 +7,96 @@ import { saveResult } from "@/lib/storage";
 
 /* ─── Puzzle Generator ────────────────────── */
 
-function generateRegions(size: number): number[][] {
-  const grid: number[][] = Array.from({ length: size }, () => Array(size).fill(-1));
-  const regionCount = size;
-
-  // Start with each cell as seed of its own region group
-  // Merge adjacent regions until we have `regionCount` regions
-  const seeds: { r: number; c: number }[] = [];
-  // Pick size seed cells distributed across the grid
-  for (let i = 0; i < regionCount; i++) {
-    const r = Math.floor(Math.random() * size);
-    const c = Math.floor(Math.random() * size);
-    // Make sure no two seeds are adjacent (including diagonally)
-    const conflict = seeds.some((s) => Math.abs(s.r - r) <= 2 && Math.abs(s.c - c) <= 2);
-    if (!conflict) seeds.push({ r, c });
-    else i--;
-  }
-
-  // Flood fill from each seed to assign regions
-  const queue = [...seeds];
-  const regionIds = seeds.map((_, i) => i);
-
-  seeds.forEach((s, i) => {
-    grid[s.r][s.c] = i;
-  });
-
-  while (queue.length > 0) {
-    const { r, c } = queue.shift()!;
-    const regionId = grid[r][c];
-
-    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    // Shuffle directions for randomness
-    const shuffled = dirs.sort(() => Math.random() - 0.5);
-
-    for (const [dr, dc] of shuffled) {
-      const nr = r + dr;
-      const nc = c + dc;
-      if (nr >= 0 && nr < size && nc >= 0 && nc < size && grid[nr][nc] === -1) {
-        grid[nr][nc] = regionId;
-        queue.push({ r: nr, c: nc });
-      }
-    }
-  }
-
-  return grid;
-}
-
-function findStarPlacement(regions: number[][]): [number, number][] | null {
-  const size = regions.length;
-  const solution: [number, number][] = [];
-
-  function isValid(r: number, c: number, placed: [number, number][]): boolean {
-    // Check row
-    if (placed.some(([pr, _]) => pr === r)) return false;
-    // Check column
-    if (placed.some(([_, pc]) => pc === c)) return false;
-    // Check region
-    const region = regions[r][c];
-    if (placed.some(([pr, pc]) => regions[pr][pc] === region)) return false;
-    // Check adjacency (including diagonals)
-    if (placed.some(([pr, pc]) => Math.abs(pr - r) <= 1 && Math.abs(pc - c) <= 1)) return false;
-    return true;
-  }
-
-  function backtrack(row: number): boolean {
-    if (row === size) return true;
-    for (let col = 0; col < size; col++) {
-      if (isValid(row, col, solution)) {
-        solution.push([row, col]);
-        if (backtrack(row + 1)) return true;
-        solution.pop();
-      }
-    }
-    return false;
-  }
-
-  // Try multiple starting orders for more variety
-  for (let attempt = 0; attempt < 10; attempt++) {
-    solution.length = 0;
-    const rowOrder = Array.from({ length: size }, (_, i) => i).sort(() => Math.random() - 0.5);
-    const placed: [number, number][] = [];
-
-    let success = true;
-    for (const row of rowOrder) {
-      // Try columns in random order
-      const colOrder = Array.from({ length: size }, (_, i) => i).sort(() => Math.random() - 0.5);
-      let found = false;
-      for (const col of colOrder) {
-        if (isValid(row, col, placed)) {
-          placed.push([row, col]);
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        success = false;
-        break;
-      }
-    }
-
-    if (success && placed.length === size) {
-      return placed;
-    }
-  }
-
-  return null;
-}
-
+/**
+ * Generate a valid Star Battle puzzle.
+ * Strategy: place stars first (guaranteed valid), then grow regions around them.
+ */
 function generatePuzzle(size: number): {
   regions: number[][];
   solution: [number, number][];
 } | null {
-  // Try up to 50 times to generate a valid puzzle
-  for (let attempt = 0; attempt < 50; attempt++) {
-    const regions = generateRegions(size);
-    const solution = findStarPlacement(regions);
-    if (solution) {
-      return { regions, solution };
+  const maxAttempts = 20;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Step 1: Place stars — one per row, one per column, no adjacency
+    const stars: [number, number][] = [];
+    const usedCols = new Set<number>();
+
+    // Try placing stars row by row
+    let success = true;
+    for (let r = 0; r < size; r++) {
+      // Find valid columns for this row
+      const validCols: number[] = [];
+      for (let c = 0; c < size; c++) {
+        if (usedCols.has(c)) continue;
+        // Check adjacency with already-placed stars
+        const adjacent = stars.some(
+          ([pr, pc]) => Math.abs(pr - r) <= 1 && Math.abs(pc - c) <= 1
+        );
+        if (!adjacent) validCols.push(c);
+      }
+      if (validCols.length === 0) {
+        success = false;
+        break;
+      }
+      // Pick a random valid column
+      const col = validCols[Math.floor(Math.random() * validCols.length)];
+      stars.push([r, col]);
+      usedCols.add(col);
+    }
+
+    if (!success || stars.length !== size) continue;
+
+    // Step 2: Grow regions from stars using nearest-star (Voronoi) partitioning
+    const regions: number[][] = Array.from({ length: size }, () => Array(size).fill(-1));
+
+    // BFS from all star positions simultaneously
+    const queue: { r: number; c: number; regionId: number }[] = [];
+    stars.forEach(([r, c], i) => {
+      regions[r][c] = i;
+      queue.push({ r, c, regionId: i });
+    });
+
+    // Shuffle directions for organic-looking regions
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+
+    while (queue.length > 0) {
+      // Pick random from queue for variety
+      const qi = Math.floor(Math.random() * queue.length);
+      const { r, c, regionId } = queue[qi];
+      queue[qi] = queue[queue.length - 1];
+      queue.pop();
+
+      // Shuffle directions each time
+      for (let d = dirs.length - 1; d > 0; d--) {
+        const j = Math.floor(Math.random() * (d + 1));
+        [dirs[d], dirs[j]] = [dirs[j], dirs[d]];
+      }
+
+      for (const [dr, dc] of dirs) {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] === -1) {
+          // Assign to this star's region
+          regions[nr][nc] = regionId;
+          queue.push({ r: nr, c: nc, regionId });
+        }
+      }
+    }
+
+    // Verify all cells are assigned
+    const allAssigned = regions.every(row => row.every(cell => cell >= 0));
+    if (!allAssigned) continue;
+
+    // Step 3: Verify a star exists in each region
+    const regionHasStar = new Array(size).fill(false);
+    for (const [r, c] of stars) {
+      regionHasStar[regions[r][c]] = true;
+    }
+    if (regionHasStar.every(Boolean)) {
+      return { regions, solution: stars };
     }
   }
+
   return null;
 }
 
