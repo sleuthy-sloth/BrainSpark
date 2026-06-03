@@ -1,0 +1,38 @@
+project_id = "neuralpulse"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "https://neuralpulse.app"
+additional_redirect_urls = ["https://neuralpulse.app"]
+enable_signup = true
+
+[analytics]
+enabled = true
+backend = "postgres"
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+
+[inbucket]
+enabled = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"

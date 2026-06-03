@@ -21,6 +21,12 @@ NeuralPulse is an open-source brain training web app — think Elevate or Lumosi
 | **Speed Tap** | Reflexes | React as fast as you can when the signal changes. Measure your response time. |
 | **Word Twist** | Vocabulary | Unscramble letters to form words. Expand your mental agility. |
 
+## Project Status
+
+[![GitHub](https://img.shields.io/github/license/sleuthy-sloth/NeuralPulse)](LICENSE.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![CI](https://github.com/sleuthy-sloth/NeuralPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/sleuthy-sloth/NeuralPulse/actions/workflows/ci.yml)
+
 ## Features
 
 - **8 brain games** — memory, math, reflexes, vocabulary, and focus challenges

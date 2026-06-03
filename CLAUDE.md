@@ -74,6 +74,16 @@ Required for Supabase auth/sync (app works without them for guest mode):
 
 Set in `.env.local` for local dev, Vercel dashboard for production.
 
+## Community
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+- **Code of Conduct** — [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Contributing Guide** — [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Security Policy** — [SECURITY.md](SECURITY.md)
+- **Bug Reports** — [.github/ISSUE_TEMPLATE/bug_report.yaml](.github/ISSUE_TEMPLATE/bug_report.yaml)
+- **Feature Requests** — [.github/ISSUE_TEMPLATE/feature_request.yaml](.github/ISSUE_TEMPLATE/feature_request.yaml)
+
 ## Supabase Schema
 
 Migration file: `supabase/migrations/001_initial_schema.sql`

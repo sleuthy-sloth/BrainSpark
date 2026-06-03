@@ -1,0 +1,46 @@
+name: Bug Report
+description: Report a bug to help us improve NeuralPulse
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: What happened vs what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: input
+    id: game
+    attributes:
+      label: Game / Page
+      description: Which game or page had the issue?
+      placeholder: e.g., Sequence Memory, Daily Challenge, Stats
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & Device
+      description: Browser name/version and device type
+      placeholder: e.g., Chrome 124 on iPhone 15, Safari on MacBook
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Add screenshots if applicable.
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Any browser console errors (press F12 to open DevTools).
