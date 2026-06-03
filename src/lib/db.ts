@@ -4,17 +4,17 @@ import { supabase, getUser } from "./supabase";
 
 export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory";
 
-export type Category = "math" | "memory" | "focus";
+export type Category = "numeracy" | "memory" | "focus" | "reflexes" | "vocabulary" | "logic";
 
 export const GAME_CATEGORIES: Record<GameId, Category> = {
-  "math-quiz": "math",
-  "quick-equations": "math",
+  "math-quiz": "numeracy",
+  "quick-equations": "numeracy",
   "memory-match": "memory",
   "memory-matrix": "memory",
   "sequence-memory": "memory",
-  "speed-reaction": "focus",
+  "speed-reaction": "reflexes",
   "stroop-match": "focus",
-  "word-scramble": "focus",
+  "word-scramble": "vocabulary",
 };
 
 export interface GameResult {
@@ -166,7 +166,7 @@ export async function getProficiency(gameId?: GameId): Promise<Proficiency> {
   const all = await db.getAll("proficiency");
   return {
     gameId: "math-quiz" as GameId,
-    category: "math",
+    category: "numeracy",
     totalPlays: all.reduce((s, p) => s + p.totalPlays, 0),
     bestScore: Math.max(...all.map((p) => p.bestScore), 0),
     bestAccuracy: Math.max(...all.map((p) => p.bestAccuracy), 0),
@@ -250,8 +250,8 @@ export async function calculateBrainQuotient(): Promise<number> {
 
 export async function generateDailyWorkout(): Promise<GameId[]> {
   const profs = await getAllProficiency();
-  const counts: Record<Category, number> = { math: 0, memory: 0, focus: 0 };
-  const lastPlayed: Record<Category, number> = { math: 0, memory: 0, focus: 0 };
+  const counts: Record<Category, number> = { numeracy: 0, memory: 0, focus: 0, reflexes: 0, vocabulary: 0, logic: 0 };
+  const lastPlayed: Record<Category, number> = { numeracy: 0, memory: 0, focus: 0, reflexes: 0, vocabulary: 0, logic: 0 };
 
   for (const p of profs) {
     const cat = GAME_CATEGORIES[p.gameId];
@@ -262,24 +262,26 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
   }
 
   // Pick the least-played / oldest category to prioritize
-  const categories: Category[] = ["math", "memory", "focus"];
+  const categories: Category[] = ["numeracy", "memory", "focus", "reflexes", "vocabulary", "logic"];
   categories.sort((a, b) => {
     const diff = (counts[a] || 0) - (counts[b] || 0);
-    if (diff !== 0) return diff; // least played first
-    return (lastPlayed[a] || 0) - (lastPlayed[b] || 0); // oldest first
+    if (diff !== 0) return diff;
+    return (lastPlayed[a] || 0) - (lastPlayed[b] || 0);
   });
 
-  // Pick one game from each category (top 3)
   const gamesByCat: Record<Category, GameId[]> = {
-    math: ["quick-equations", "math-quiz"],
+    numeracy: ["quick-equations", "math-quiz"],
     memory: ["memory-matrix", "memory-match", "sequence-memory"],
-    focus: ["stroop-match", "speed-reaction", "word-scramble"],
+    focus: ["stroop-match"],
+    reflexes: ["speed-reaction"],
+    vocabulary: ["word-scramble"],
+    logic: [],
   };
 
   const workout: GameId[] = [];
   for (const cat of categories) {
-    const pool = gamesByCat[cat];
-    // Pick the one with highest relative need
+    const pool = gamesByCat[cat] || [];
+    if (pool.length === 0) continue;
     const catProfs = await getCategoryProficiency(cat);
     const scored = pool.map((gid) => {
       const p = catProfs.find((p) => p.gameId === gid);
@@ -289,7 +291,6 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
     workout.push(scored[0]?.gid || pool[0]);
   }
 
-  // Shuffle order for variety
   for (let i = workout.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [workout[i], workout[j]] = [workout[j], workout[i]];

@@ -1,9 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+/**
+ * Lazily initialized Supabase client.
+ * During static generation (no env vars), returns a minimal no-op stub
+ * so build doesn't crash. At runtime with env vars, returns the real client.
+ */
+function getSupabaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabaseKey(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
+}
+
+/** Non-null assertion — real usage always has env vars at runtime */
+export const supabase = createClient(getSupabaseUrl(), getSupabaseKey());
 
 export type AuthUser = {
   id: string;

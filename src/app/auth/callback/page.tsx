@@ -65,6 +65,8 @@ function CallbackContent() {
 // Need a separate default export with Suspense for useSearchParams
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
