@@ -64,11 +64,11 @@ export interface CalendarMonth {
 
 export const SKILL_DEFS: { skill: string; games: GameId[]; color: string }[] = [
   { skill: "Numeracy", games: ["math-quiz", "quick-equations"], color: "#4a9eff" },
-  { skill: "Memory", games: ["memory-match", "memory-matrix", "sequence-memory"], color: "#34d399" },
-  { skill: "Reflexes", games: ["speed-reaction"], color: "#fbbf24" },
+  { skill: "Memory", games: ["memory-match", "memory-matrix", "sequence-memory", "digit-span"], color: "#34d399" },
+  { skill: "Reflexes", games: ["speed-reaction", "reaction-grid"], color: "#fbbf24" },
   { skill: "Vocabulary", games: ["word-scramble"], color: "#a78bfa" },
-  { skill: "Focus", games: ["stroop-match"], color: "#fb7185" },
-  { skill: "Logic", games: ["star-battle"], color: "#22d3ee" },
+  { skill: "Focus", games: ["stroop-match", "flanker-task"], color: "#fb7185" },
+  { skill: "Logic", games: ["star-battle", "pattern-matrix"], color: "#22d3ee" },
 ];
 
 /* ─── Aggregation ───────────────────────────────────── */

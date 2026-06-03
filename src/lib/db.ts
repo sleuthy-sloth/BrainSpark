@@ -2,7 +2,7 @@ import { openDB, type IDBPDatabase } from "idb";
 import { supabase, getUser } from "./supabase";
 
 
-export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory" | "star-battle";
+export type GameId = "math-quiz" | "memory-match" | "speed-reaction" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory" | "star-battle" | "digit-span" | "flanker-task" | "reaction-grid" | "pattern-matrix";
 
 export type Category = "numeracy" | "memory" | "focus" | "reflexes" | "vocabulary" | "logic";
 
@@ -15,6 +15,10 @@ export const GAME_CATEGORIES: Record<GameId, Category> = {
   "speed-reaction": "reflexes",
   "stroop-match": "focus",
   "star-battle": "logic",
+  "digit-span": "memory",
+  "flanker-task": "focus",
+  "reaction-grid": "reflexes",
+  "pattern-matrix": "logic",
   "word-scramble": "vocabulary",
 };
 
@@ -272,11 +276,11 @@ export async function generateDailyWorkout(): Promise<GameId[]> {
 
   const gamesByCat: Record<Category, GameId[]> = {
     numeracy: ["quick-equations", "math-quiz"],
-    memory: ["memory-matrix", "memory-match", "sequence-memory"],
-    focus: ["stroop-match"],
-    reflexes: ["speed-reaction"],
+    memory: ["memory-matrix", "memory-match", "sequence-memory", "digit-span"],
+    focus: ["stroop-match", "flanker-task"],
+    reflexes: ["speed-reaction", "reaction-grid"],
     vocabulary: ["word-scramble"],
-    logic: ["star-battle"],
+    logic: ["star-battle", "pattern-matrix"],
   };
 
   const workout: GameId[] = [];
@@ -324,6 +328,10 @@ function mapGameType(id: GameId): string {
     "memory-matrix": "memory_matrix",
     "sequence-memory": "sequence_memory",
     "star-battle": "star_battle",
+    "digit-span": "digit_span",
+    "flanker-task": "flanker_task",
+    "reaction-grid": "reaction_grid",
+    "pattern-matrix": "pattern_matrix",
     "speed-reaction": "speed_tap",
     "stroop-match": "stroop_match",
     "word-scramble": "word_twist",
