@@ -27,12 +27,17 @@ Open a [feature request](https://github.com/sleuthy-sloth/NeuralPulse/issues/new
 2. Install dependencies: `npm install`
 3. Make your changes
 4. Run `npm run lint` and fix any issues
-5. Run `npm run build` to verify it compiles
-6. Open a PR against `main` with a clear description
+5. Run `npm test` to verify all tests pass
+6. Run `npm run build` to verify it compiles
+7. Open a PR against `main` with a clear description
+
+### 🏷️ Good First Issues
+
+Look for issues labeled [`good-first-issue`](https://github.com/sleuthy-sloth/NeuralPulse/labels/good-first-issue) — these are scoped for new contributors and include clear acceptance criteria.
 
 ### 🎮 Adding a New Game
 
-See the [CLAUDE.md](CLAUDE.md) file for the full 8-step checklist. The key files to touch are:
+See the [CLAUDE.md](CLAUDE.md) file for the full checklist. The key files to touch are:
 
 1. `src/components/games/GameName.tsx` — game component
 2. `src/app/games/game-name/page.tsx` — Suspense-wrapped page
@@ -57,6 +62,7 @@ See the [CLAUDE.md](CLAUDE.md) file for the full 8-step checklist. The key files
 ```bash
 npm install
 npm run dev    # local dev at http://localhost:3000
+npm test       # run unit tests
 npm run build  # production build
 ```
 

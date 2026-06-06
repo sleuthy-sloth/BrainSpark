@@ -20,16 +20,21 @@ NeuralPulse is an open-source brain training web app — think Elevate or Lumosi
 | **Stroop Match** | Focus | Identify the ink color, not the word itself. |
 | **Speed Tap** | Reflexes | React as fast as you can when the signal changes. Measure your response time. |
 | **Word Twist** | Vocabulary | Unscramble letters to form words. Expand your mental agility. |
+| **Star Battle** | Logic | Place one star in each row, column, and region. No two stars may touch. |
+| **Digit Span** | Memory | Remember and recall sequences of digits. Gets harder each round! |
+| **Flanker Task** | Focus | Identify the center arrow while ignoring distracting flanking arrows. |
+| **Reaction Grid** | Reflexes | Tap targets that appear on a grid as fast as you can! |
+| **Pattern Matrix** | Logic | Find the missing piece in a 3x3 pattern. Raven's matrices style. |
 
 ## Project Status
 
-[![GitHub](https://img.shields.io/github/license/sleuthy-sloth/NeuralPulse)](LICENSE.md)
+[![GitHub](https://img.shields.io/github/license/sleuthy-sloth/NeuralPulse)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![CI](https://github.com/sleuthy-sloth/NeuralPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/sleuthy-sloth/NeuralPulse/actions/workflows/ci.yml)
 
 ## Features
 
-- **8 brain games** — memory, math, reflexes, vocabulary, and focus challenges
+- **13 brain games** — memory, math, reflexes, vocabulary, focus, and logic challenges
 - **Daily Challenge** — 3-game sequence, same for everyone (like Wordle)
 - **Dark theme** — easy on the eyes, with glassmorphism cards and subtle gradients
 - **Stats dashboard** — skill radar charts, trend sparklines, calendar heatmap, personal bests
@@ -98,4 +103,4 @@ npm run build    # production build
 
 ## License
 
-CC BY-NC 4.0 — see [LICENSE.md](./LICENSE.md).
+CC BY-NC 4.0 — see [LICENSE](./LICENSE).
