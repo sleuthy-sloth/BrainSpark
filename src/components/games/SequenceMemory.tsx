@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
-import { saveResult } from "@/lib/storage";
+import { saveResult } from "@/lib/db";
 import { createRng } from "@/lib/dailyChallenge";
 
 /* ─── Tile Colors ─────────────────────────── */
