@@ -10,6 +10,12 @@ import {
   DAILY_GAME_NAMES,
 } from "../dailyChallenge";
 
+const ALL_DAILY_GAMES = [
+  "math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory",
+  "quick_equations", "memory_matrix", "stroop_match", "digit_span",
+  "flanker_task", "reaction_grid",
+] as const;
+
 // ─── getDailySeed ─────────────────────────────────────
 
 describe("getDailySeed", () => {
@@ -72,11 +78,23 @@ describe("generateDailySequence", () => {
   });
 
   it("all games are from the pool", () => {
-    const pool = ["math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory"];
     const result = generateDailySequence("2026-06-01");
     for (const game of result) {
-      expect(pool).toContain(game.game);
+      expect(ALL_DAILY_GAMES).toContain(game.game);
     }
+  });
+
+  it("generates variety across many dates", () => {
+    const allGames = new Set<string>();
+    for (let m = 1; m <= 6; m++) {
+      for (let d = 1; d <= 28; d++) {
+        const dateStr = `2026-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const result = generateDailySequence(dateStr);
+        result.forEach((g) => allGames.add(g.game));
+      }
+    }
+    // With 11 games and 168 dates, we should see most games
+    expect(allGames.size).toBeGreaterThanOrEqual(8);
   });
 });
 
@@ -142,8 +160,7 @@ describe("getTomorrowUTC", () => {
 
 describe("dailyGameRoute", () => {
   it("maps all games to valid routes", () => {
-    const games = ["math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory"] as const;
-    for (const game of games) {
+    for (const game of ALL_DAILY_GAMES) {
       const route = dailyGameRoute(game);
       expect(route).toMatch(/^\/games\//);
     }
@@ -154,8 +171,7 @@ describe("dailyGameRoute", () => {
 
 describe("dailyGameToAppId", () => {
   it("maps all games to app IDs", () => {
-    const games = ["math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory"] as const;
-    for (const game of games) {
+    for (const game of ALL_DAILY_GAMES) {
       const id = dailyGameToAppId(game);
       expect(id.length).toBeGreaterThan(0);
     }
@@ -164,14 +180,17 @@ describe("dailyGameToAppId", () => {
   it("maps math_sprint to math-quiz", () => {
     expect(dailyGameToAppId("math_sprint")).toBe("math-quiz");
   });
+
+  it("maps speed_tap to speed-tap", () => {
+    expect(dailyGameToAppId("speed_tap")).toBe("speed-tap");
+  });
 });
 
 // ─── DAILY_GAME_NAMES ─────────────────────────────────
 
 describe("DAILY_GAME_NAMES", () => {
   it("has names for all pooled games", () => {
-    const games = ["math_sprint", "memory_match", "speed_tap", "word_twist", "sequence_memory"];
-    for (const game of games) {
+    for (const game of ALL_DAILY_GAMES) {
       expect(DAILY_GAME_NAMES[game]).toBeTruthy();
     }
   });
