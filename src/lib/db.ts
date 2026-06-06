@@ -232,23 +232,50 @@ export async function calculateStreak(): Promise<number> {
 
 /* ─── Brain Quotient ────────────────────────────────── */
 
+/**
+ * Calculate Brain Score — a single number summarizing overall cognitive performance.
+ *
+ * Formula:
+ *   1. Compute a weighted average accuracy across all games, where each game's
+ *      accuracy is weighted by number of plays (more plays = more weight).
+ *   2. Apply an experience multiplier that scales from 0 (no plays) to ~1 (50+ total plays).
+ *      This prevents new users from showing a misleadingly high/low score.
+ *   3. Scale to 0–100.
+ *
+ * The experience multiplier uses a smooth curve: 1 - 1/(1 + totalPlays/10).
+ *   - 0 plays  → 0%
+ *   - 5 plays  → 33%
+ *   - 10 plays → 50%
+ *   - 30 plays → 75%
+ *   - 50+ plays → ~83%+
+ */
 export async function calculateBrainQuotient(): Promise<number> {
   const profs = await getAllProficiency();
   if (profs.length === 0) return 0;
 
-  // BQ = normalized weighted score across all categories
-  let total = 0;
-  let count = 0;
+  let weightedAccuracySum = 0;
+  let totalWeight = 0;
+  let totalPlays = 0;
+
   for (const p of profs) {
     if (p.totalPlays > 0) {
-      const avg = Math.round(p.cumulativeScore / p.totalPlays);
-      const weighted = avg * Math.min(p.totalPlays / 5, 1); // weight by experience
-      total += weighted;
-      count++;
+      const avgAccuracy = p.cumulativeScore / p.totalPlays;
+      // Use accuracy directly as the score component (0-100 range from accuracy field)
+      // Weight by number of plays so frequently-played games count more
+      weightedAccuracySum += avgAccuracy * p.totalPlays;
+      totalWeight += p.totalPlays;
+      totalPlays += p.totalPlays;
     }
   }
-  if (count === 0) return 0;
-  return Math.round(total / count * 10);
+
+  if (totalWeight === 0) return 0;
+
+  const weightedAvgAccuracy = weightedAccuracySum / totalWeight;
+
+  // Experience multiplier: smooth curve from 0 to ~1
+  const experienceMultiplier = 1 - 1 / (1 + totalPlays / 10);
+
+  return Math.round(weightedAvgAccuracy * experienceMultiplier);
 }
 
 /* ─── Daily Workout Generator ────────────────────────── */
