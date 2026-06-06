@@ -1,5 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
 import { supabase, getUser } from "./supabase";
+import { pickDailyGames } from "./dailySelection";
 
 
 export type GameId = "math-quiz" | "memory-match" | "speed-tap" | "word-scramble" | "quick-equations" | "memory-matrix" | "stroop-match" | "sequence-memory" | "star-battle" | "digit-span" | "flanker-task" | "reaction-grid" | "pattern-matrix";
@@ -281,54 +282,8 @@ export async function calculateBrainQuotient(): Promise<number> {
 /* ─── Daily Workout Generator ────────────────────────── */
 
 export async function generateDailyWorkout(): Promise<GameId[]> {
-  const profs = await getAllProficiency();
-  const counts: Record<Category, number> = { numeracy: 0, memory: 0, focus: 0, reflexes: 0, vocabulary: 0, logic: 0 };
-  const lastPlayed: Record<Category, number> = { numeracy: 0, memory: 0, focus: 0, reflexes: 0, vocabulary: 0, logic: 0 };
-
-  for (const p of profs) {
-    const cat = GAME_CATEGORIES[p.gameId];
-    if (p.totalPlays > 0) {
-      counts[cat]++;
-      lastPlayed[cat] = Math.max(lastPlayed[cat], p.lastPlayed);
-    }
-  }
-
-  // Pick the least-played / oldest category to prioritize
-  const categories: Category[] = ["numeracy", "memory", "focus", "reflexes", "vocabulary", "logic"];
-  categories.sort((a, b) => {
-    const diff = (counts[a] || 0) - (counts[b] || 0);
-    if (diff !== 0) return diff;
-    return (lastPlayed[a] || 0) - (lastPlayed[b] || 0);
-  });
-
-  const gamesByCat: Record<Category, GameId[]> = {
-    numeracy: ["quick-equations", "math-quiz"],
-    memory: ["memory-matrix", "memory-match", "sequence-memory", "digit-span"],
-    focus: ["stroop-match", "flanker-task"],
-    reflexes: ["speed-tap", "reaction-grid"],
-    vocabulary: ["word-scramble"],
-    logic: ["star-battle", "pattern-matrix"],
-  };
-
-  const workout: GameId[] = [];
-  for (const cat of categories) {
-    const pool = gamesByCat[cat] || [];
-    if (pool.length === 0) continue;
-    const catProfs = await getCategoryProficiency(cat);
-    const scored = pool.map((gid) => {
-      const p = catProfs.find((p) => p.gameId === gid);
-      return { gid, weight: p ? (p.totalPlays || 0) + (p.lastPlayed ? (Date.now() - p.lastPlayed) / 86400000 : 1000) : 0 };
-    });
-    scored.sort((a, b) => a.weight - b.weight);
-    workout.push(scored[0]?.gid || pool[0]);
-  }
-
-  for (let i = workout.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [workout[i], workout[j]] = [workout[j], workout[i]];
-  }
-
-  return workout;
+  // Pick 6 random games from the daily pool (one per category-ish)
+  return pickDailyGames(6);
 }
 
 /* ─── Supabase Service Layer ──────────────────────── */

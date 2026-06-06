@@ -2,8 +2,9 @@
  * Deterministic seed generation for daily challenges.
  * Same date → same seed → same game sequence for every user.
  */
+import { pickDailyGameIds, type DailyGameId } from "./dailySelection";
 
-export type DailyGameId = "math_sprint" | "memory_match" | "speed_tap" | "word_twist" | "sequence_memory" | "quick_equations" | "memory_matrix" | "stroop_match" | "digit_span" | "flanker_task" | "reaction_grid";
+export type { DailyGameId };
 
 export interface DailyGame {
   game: DailyGameId;
@@ -27,54 +28,17 @@ export function getDailySeed(dateStr: string): number {
 /**
  * Generate a deterministic 3-game sequence for a given date.
  * Same date → same sequence for all users (like Wordle).
+ * Uses the shared pickDailyGames for selection, then wraps with difficulty/seed.
  */
 export function generateDailySequence(dateStr: string): DailyGame[] {
   const seed = getDailySeed(dateStr);
+  const selected = pickDailyGameIds(3, dateStr);
 
-  // Pick 3 of 11 games deterministically, with difficulty
-  const poolSize = GAME_POOL.length;
-  const games: DailyGame[] = [
-    {
-      game: GAME_POOL[seed % poolSize],
-      difficulty: DIFFICULTIES[seed % 3],
-      seed: seed,
-    },
-    {
-      game: GAME_POOL[(seed + 1) % poolSize],
-      difficulty: DIFFICULTIES[(seed + 2) % 3],
-      seed: seed + 1,
-    },
-    {
-      game: GAME_POOL[(seed + 2) % poolSize],
-      difficulty: DIFFICULTIES[(seed + 1) % 3],
-      seed: seed + 2,
-    },
-  ];
-
-  // Deduplicate — if any game is repeated, replace with the missing game
-  const seen = new Set<DailyGameId>();
-  const result: DailyGame[] = [];
-  const missing = GAME_POOL.filter((g) => !games.some((dg) => dg.game === g));
-
-  for (const g of games) {
-    if (!seen.has(g.game)) {
-      seen.add(g.game);
-      result.push(g);
-    }
-  }
-  // Fill any gaps with missing games
-  while (result.length < 3) {
-    const m = missing[result.length - 1];
-    if (m) {
-      result.push({
-        game: m,
-        difficulty: DIFFICULTIES[(seed + result.length) % 3],
-        seed: seed + result.length + 10,
-      });
-    }
-  }
-
-  return result;
+  return selected.map((dailyId, i) => ({
+    game: dailyId,
+    difficulty: DIFFICULTIES[(seed + i) % 3],
+    seed: seed + i,
+  }));
 }
 
 /**
