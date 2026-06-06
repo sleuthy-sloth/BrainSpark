@@ -100,7 +100,7 @@ export function dailyGameRoute(game: DailyGameId): string {
   const map: Record<DailyGameId, string> = {
     math_sprint: "/games/math-quiz",
     memory_match: "/games/memory-match",
-    speed_tap: "/games/speed-reaction",
+    speed_tap: "/games/speed-tap",
     word_twist: "/games/word-scramble",
     sequence_memory: "/games/sequence-memory",
   };
@@ -114,7 +114,7 @@ export function dailyGameToAppId(game: DailyGameId): string {
   const map: Record<DailyGameId, string> = {
     math_sprint: "math-quiz",
     memory_match: "memory-match",
-    speed_tap: "speed-reaction",
+    speed_tap: "speed-tap",
     word_twist: "word-scramble",
     sequence_memory: "sequence-memory",
   };

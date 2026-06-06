@@ -57,7 +57,7 @@ function SpeedReactionContent() {
           setPhase("done");
           const avg = [...reactionTimes, rt].reduce((a, b) => a + b, 0) / (reactionTimes.length + 1);
           const score = Math.max(0, Math.round((1000 - avg) / 1000 * 10000));
-          saveResult({ gameId: "speed-reaction", score, maxScore: 10000, accuracy: Math.round(Math.max(0, 1 - earlyCount / TOTAL) * 100), difficulty: "medium", duration: Math.round((Date.now() - startTime.current) / 1000) });
+          saveResult({ gameId: "speed-tap", score, maxScore: 10000, accuracy: Math.round(Math.max(0, 1 - earlyCount / TOTAL) * 100), difficulty: "medium", duration: Math.round((Date.now() - startTime.current) / 1000) });
         } else {
           setRound(nextRound);
           startWait();

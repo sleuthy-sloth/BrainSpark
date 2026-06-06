@@ -130,11 +130,11 @@ export const GAMES_META: GameMeta[] = [
     gradient: "text-gradient-green",
   },
   {
-    id: "speed-reaction",
+    id: "speed-tap",
     title: "Speed Tap",
     subtitle: "Reflex challenge",
     description: "React as fast as you can when the signal changes.",
-    href: "/games/speed-reaction",
+    href: "/games/speed-tap",
     category: "reflexes",
     color: "#fbbf24",
     icon: "⚡",
