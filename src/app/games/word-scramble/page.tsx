@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useCallback, useRef } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
@@ -189,12 +190,14 @@ function WordScrambleContent() {
 
 export default function WordScramblePage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
-      </main>
-    }>
-      <WordScrambleContent />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <main className="min-h-dvh flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+        </main>
+      }>
+        <WordScrambleContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

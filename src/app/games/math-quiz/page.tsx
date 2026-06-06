@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect, useCallback } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
@@ -172,12 +173,14 @@ function MathQuizContent() {
 
 export default function MathQuizPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
-      </main>
-    }>
-      <MathQuizContent />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <main className="min-h-dvh flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+        </main>
+      }>
+        <MathQuizContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

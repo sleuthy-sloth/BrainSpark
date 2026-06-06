@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import GameWrapper, { type GameConfig, type GameAPI } from "@/engine/GameWrapper";
@@ -300,12 +301,14 @@ function MemoryMatrixContent() {
 
 export default function MemoryMatrixPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
-      </main>
-    }>
-      <MemoryMatrixContent />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <main className="min-h-dvh flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+        </main>
+      }>
+        <MemoryMatrixContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
